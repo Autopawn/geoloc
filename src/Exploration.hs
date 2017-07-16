@@ -7,6 +7,8 @@ import qualified Data.List as L
 import qualified Data.Set as S
 import qualified Data.Map as M
 
+import Debug.Trace (trace)
+
 {- | Función genérica de reducción:
     objective = función objetivo para una solución tipo a.
     disim = medida de disimilitud entre dos soluciones.
@@ -14,7 +16,7 @@ import qualified Data.Map as M
     target_len = cantidad de elementos representativos a los que se quiere reducir el conjunto de soluciones.
     sols = lista de soluciones.
 -}
-reduce :: (Ord a, Real o, Ord d) => (a -> o) -> (a -> a -> d) -> Int -> Int ->
+reduce :: (Ord a, Real o, Ord d, Show o) => (a -> o) -> (a -> a -> d) -> Int -> Int ->
     [a] -> [a]
 reduce objective disim vis_range target_len sols = let
     ordered_sols = L.sortBy (\a b -> compare (objective b) (objective a)) sols
@@ -23,7 +25,8 @@ reduce objective disim vis_range target_len sols = let
         i <- [1..vis_range], x + i < length smap]
     disimils = S.fromList $
         map (\(a,b) -> (disim (smap M.! a) (smap M.! b), (a,b))) pairs
-    in M.elems $ reduce' disim vis_range target_len disimils smap
+    in trace ((if null ordered_sols then "NO" else show (objective (head ordered_sols))) ++ " " ++ show (length sols)) $ M.elems $
+        reduce' disim vis_range target_len disimils smap
 
 reduce' :: (Ord a, Ord d) => (a -> a -> d) -> Int -> Int ->
     S.Set (d,(Int,Int)) -> M.Map Int a -> M.Map Int a
@@ -53,7 +56,7 @@ reduce' disim vis_range target_len disimils sols
     empty_sol = solución base, sin ningún elemento.
     elements = lista de elementos con los que se forman las soluciones.
 -}
-explore :: (Ord a, Real o, Ord d) =>
+explore :: (Ord a, Real o, Ord d, Show o) =>
     (a -> o) -> (a -> a -> d) -> (e -> a -> a) -> Int -> Int -> a ->
     [e] -> [a]
 explore objective disim extend vis_range pool_size empty_sol elements = let
@@ -62,7 +65,7 @@ explore objective disim extend vis_range pool_size empty_sol elements = let
     in map snd $ reverse $
     L.sort $ map (\a -> (objective a, a)) $ concat solutions
 
-explore' :: (Ord a, Real o, Ord d) =>
+explore' :: (Ord a, Real o, Ord d, Show o) =>
     (a -> o) -> (a -> a -> d) -> (e -> a -> a) -> Int -> Int ->
     [e] -> [a] -> [a]
 explore' objective disim extend vis_range pool_size elements previous = let

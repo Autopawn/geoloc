@@ -1,7 +1,4 @@
-module Geoloc (
-    Problem(..),
-
-) where
+module Geoloc where
 
 import Exploration
 
@@ -54,6 +51,8 @@ data Combi = Combi {
     profit :: Float
 }
 
+instance Show Combi where
+    show comb = show $ S.toList (facilities comb)
 instance Eq Combi where
     (==) a b = (facilities a) == (facilities b)
 instance Ord Combi where
@@ -68,14 +67,18 @@ addFacility prob fa combI
     | S.member fa (facilities combI) = combI
     | otherwise                      = foldr (\src comb -> let
         newApport = (apportation prob) src fa
-        oldApport = if M.member src (worked comb) then 0.0
+        oldApport = if M.notMember src (worked comb) then 0.0
                     else (apportation prob) src (worked comb M.! src)
         in if newApport > oldApport then
             comb {
                 worked = M.insert src fa (worked comb),
                 profit = (profit comb) + newApport - oldApport
             } else comb
-    ) combI {profit = profit combI - constantCost prob} [0..sourceN prob-1]
+    ) combN [0..sourceN prob-1]
+    where
+    combN = combI {
+        profit = profit combI - constantCost prob,
+        facilities = S.insert fa (facilities combI)}
 
 dissimilitude :: Problem -> Combi -> Combi -> Float
 dissimilitude prob ca cb = let
