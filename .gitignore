@@ -1,3 +1,6 @@
+*.exe
+*.swp
+
 dist
 dist-*
 cabal-dev

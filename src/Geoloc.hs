@@ -88,3 +88,11 @@ dissimilitude prob ca cb = let
         (facilityDistance prob) (S.elemAt (i-1) fsa) (S.elemAt (j-1) fsb)) |
         i <- [1..length fsa], j <- [1..length fsb]]
     in snd $ hungarianMethodFloat dists
+
+simpleDissimilitude :: Problem -> Combi -> Combi -> Float
+simpleDissimilitude prob ca cb = let
+    fsa = S.toList (facilities ca)
+    fsb = S.toList (facilities cb)
+    dists_a = sum [minimum [(facilityDistance prob) a b | b <- fsb] | a <- fsa]
+    dists_b = sum [minimum [(facilityDistance prob) b a | a <- fsa] | b <- fsb]
+    in dists_a + dists_b
