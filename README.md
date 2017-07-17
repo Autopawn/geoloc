@@ -1,6 +1,6 @@
 # Geoloc
 
-## Dependencias
+## Dependencias código Haskell
 
 * Instalar paquetes con `cabal` (paquete `cabal-install` en `dnf`) así:
 
@@ -10,3 +10,7 @@
     ```
 
 * Paquete `munkres` para método húngaro, agradecimientos a *Balazs Komuves*.
+
+## Dependencias documento
+
+* `texlive-babel-spanish`.

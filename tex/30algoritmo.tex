@@ -1,0 +1,30 @@
+\section{Algoritmo}
+
+El algoritmo comienza encontrando todas las ubicaciones de instalaciones que, por si solas, tienen función objetivo positiva:
+
+\begin{equation}
+X = \{ s |  \quad s \in Z, \quad \Phi(\{s\}) \geq 0 \}
+\end{equation}
+
+Estas ubicaciones forman la \emph{base} de soluciones de tamaño 1:
+
+\begin{equation}
+B_1 = \{ \{s\} | \quad s \in X \}
+\end{equation}
+
+El algoritmo procede realizando iteraciones, cada una consiste en un proceso de \textbf{reducción} de la base a una cantidad manejable de soluciones representativas (llámese \emph{pool}) y una posterior \textbf{expansión} de esta \emph{pool} para formar la \emph{base} de soluciones de tamaño mayor.
+
+El proceso de reducción se puede escribir como:
+\begin{equation}
+P_n = Reduce(B_n)
+\end{equation}
+donde la función $Reduce$ se explicará más adelante. El algoritmo trabaja con un parámetro \texttt{POOL\_SIZE} que indica la cantidad máxima de soluciones que puede tener una \emph{pool}, una mayor \emph{pool} explorará más posibles soluciones pero tendrá un costo computacional mayor.
+
+Por otro lado el proceso de expansión está dado por:
+\begin{equation}
+B_{n+1} = \{p \cup \{x\} |
+    \quad p \in P_n, \quad x \in X, \quad x \notin p, \quad \Phi(p \cup \{x\}) \geq \Phi(p) \}
+\end{equation}
+que consiste en tomar cada solución de la \emph{pool} y agregarle una nueva ubicación de todas las formas posibles que aumenten el valor de la función objetivo, no interesan las soluciones en que la función objetivo disminuye al agregar una instalación en $x$ porque esto significa que cualquier solución que incluya $x$ mejorará al quitar $x$ (Si $x$ no aporta por si sólo, lo hará menos en presencia de otras instalaciones que podrían quitarle clientes).
+
+El algoritmo termina cuando la base de la generación siguiente se encuentra \emph{vacía}, y retorna la combinación $\hat{S}$ que haya logrado un mayor valor de la función objetivo $\Phi$ de entre todas las \emph{pools} $P_i$.
