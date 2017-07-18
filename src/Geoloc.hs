@@ -80,6 +80,8 @@ addFacility prob fa combI
         profit = profit combI - constantCost prob,
         facilities = S.insert fa (facilities combI)}
 
+{- | The Minimum Weight Matching between two combinations.
+-}
 dissimilitude :: Problem -> Combi -> Combi -> Float
 dissimilitude prob ca cb = let
     fsa = facilities ca
@@ -89,10 +91,13 @@ dissimilitude prob ca cb = let
         i <- [1..length fsa], j <- [1..length fsb]]
     in snd $ hungarianMethodFloat dists
 
+{- | The Modified Hausdorff distance between two combinations.
+dist_a and dist_b are not divided by the number of facilities because is the same for both.
+-}
 simpleDissimilitude :: Problem -> Combi -> Combi -> Float
 simpleDissimilitude prob ca cb = let
     fsa = S.toList (facilities ca)
     fsb = S.toList (facilities cb)
     dists_a = sum [minimum [(facilityDistance prob) a b | b <- fsb] | a <- fsa]
     dists_b = sum [minimum [(facilityDistance prob) b a | a <- fsa] | b <- fsb]
-    in dists_a + dists_b
+    in max dists_a dists_b
