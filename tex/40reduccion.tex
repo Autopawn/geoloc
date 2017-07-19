@@ -1,7 +1,8 @@
 \section{Método de reducción}
 
-
 La idea principal del algoritmo, para prevenir la explosión combinatoria que sería explorar todas las posibles soluciones, es que, en cada iteración, la \emph{pool} contenga soluciones buenas pero \emph{representativas}. Para lograr esto, es necesario contar con una medida de disimilaridad entre las soluciones de la \emph{base}, e ir eliminando sistemáticamente soluciones que pueden ser representadas por otras similares, hasta que queden solo \texttt{POOL\_SIZE} de estas.
+
+Si las soluciones fueran puntos en el espacio se podrían utilizar métodos de \emph{clustering} como \emph{k-means}, sin embargo, como son conjuntos de ubicaciones que tienen la misma cardinalidad no se puede utilizar estos métodos, por ejemplo, al unir dos soluciones en un mismo grupo, tener como representante del mismo grupo una posición promedio no es una opción.
 
 Para realizar la reducción se requiere una medida de disimilaridad entre dos soluciones $A,B$ de la \emph{base} $B_n$ (y por lo tanto de tamaño $n$), llámese $D(A,B)$, siendo lógico que esta esté relacionada con la medida de distancia entre ubicaciones $d(u,v)$, las posibles medidas de disimilaridad se discutirán en la sección siguiente.
 
@@ -9,9 +10,10 @@ Un primer enfoque para resolver el problema de reducir las soluciones sería cal
 
 El problema con esto es que una \emph{base} tiene $O(|X|$\texttt{POOL\_SIZE}$)$ soluciones y sería necesario calcular $O({|X|}^2$\texttt{POOL\_SIZE}$^2)$ disimilaridades, lo que también puede verse como $O({|Z|}^2$\texttt{POOL\_SIZE}$^2)$ si todas las ubicaciones de instalaciones son rentables.
 
-Para evitar esto, dada la forma de la función objetivo y la medida de disimilitud, se puede asumir que si dos soluciones son similares \emph{geográficamente} (vale decír, respecto a que tan alejadas están sus ubicaciones de instalaciones) lo serán al ser evaluadas en la función $\Phi$.
+Para evitar esto, dada la forma de la función objetivo y la medida de disimilitud, se puede asumir que si dos soluciones son similares \emph{geográficamente} (vale decír, respecto a que tan alejadas están sus ubicaciones de instalaciones) lo serán al ser evaluadas en la función $\Phi$. En
+\ref{metricas_disimilitud} se explica la medida de disimilitud, en \ref{justificacion_reduccion} se justifica esta suposición.
 
-En primer lugar, cada solución en la \emph{base} se ordena de mayor a menor valor tenga al ser evaluada en la función $\Phi$, luego, para cada una, se evalua su disimilitud sólo con las \texttt{VISION\_RANGE} siguientes, se detecta el par con la menor dismilaridad y del par se elimina el de menor $\Phi$. Tras esta eliminación, se calculan una disimilaridad más para cada una de las soluciones que estaban antes de la que se eliminó (a menos de \texttt{VISION\_RANGE} posiciones) a fin de que se sigan teniendo las disimilaridades \texttt{VISION\_RANGE} soluciones adelante. Este proceso se repite hasta que sólo quedan \texttt{POOL\_SIZE} soluciones.
+En primer lugar, cada solución en la \emph{base} se ordena de mayor a menor valor tenga al ser evaluada en la función $\Phi$, luego, para cada una, se evalua su disimilitud sólo con las \texttt{VISION\_RANGE} siguientes, se detecta el par con la menor dismilaridad y del par se elimina el de menor $\Phi$. Tras esta eliminación, se calcula una disimilaridad más para cada una de las soluciones hasta \texttt{VISION\_RANGE} posiciones antes de la que se eliminó, a fin de que se sigan teniendo las disimilaridades \texttt{VISION\_RANGE} soluciones adelante. Este proceso se repite hasta que sólo quedan \texttt{POOL\_SIZE} soluciones.
 
 Esta heurística puede ser aplicada para tener el mismo resultado que el primer enfoque, siempre y cuando \texttt{VISION\_RANGE} sea suficiente, porque se da que las soluciones más \emph{geograficamente} similares, tienen valor similares en la función $\Phi$ y, si no alcanzan a estar a lo mas a \texttt{VISION\_RANGE} posiciones en la \emph{base}, conforme esta se va reduciendo, lo estarán. Aplicar esto reduce la cantidad de disimilitudes a calcular de $O(|Z|^2$\texttt{POOL\_SIZE}$^2)$ a $O(|Z|$\texttt{POOL\_SIZE} \texttt{VISION\_RANGE}$)$.
 

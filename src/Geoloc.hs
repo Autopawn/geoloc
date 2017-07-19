@@ -91,8 +91,8 @@ dissimilitude prob ca cb = let
         i <- [1..length fsa], j <- [1..length fsb]]
     in snd $ hungarianMethodFloat dists
 
-{- | The Modified Hausdorff distance between two combinations.
-dist_a and dist_b are not divided by the number of facilities because is the same for both.
+{- | The mean geometric error between two combinations.
+it is not divided by the number of facilities because it will be the same for any compared combinations.
 -}
 simpleDissimilitude :: Problem -> Combi -> Combi -> Float
 simpleDissimilitude prob ca cb = let
@@ -100,4 +100,4 @@ simpleDissimilitude prob ca cb = let
     fsb = S.toList (facilities cb)
     dists_a = sum [minimum [(facilityDistance prob) a b | b <- fsb] | a <- fsa]
     dists_b = sum [minimum [(facilityDistance prob) b a | a <- fsa] | b <- fsb]
-    in max dists_a dists_b
+    in dists_a + dists_b
