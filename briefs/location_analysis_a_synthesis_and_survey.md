@@ -37,6 +37,8 @@ Diferenciación por espacio 2:
 
 La distancia utilizada también es importante (Love et al. lista varias).
 
+Problemas parecidos (respecto a la función objetivo) son los *capture problems* de ReVelle, encontrar los puntos de Weber (puntos en que se minimizan los costos de transporte), Wesolowsky hace un sumario.
+
 Diferenciación de objetivos:
 - "pull" objetives (min distancia máxima, min costo transporte).
 - "push" objetives.
@@ -52,6 +54,13 @@ En el caso de varias facilities:
 - Customer-choice: El cliente elije con cuál de las facilities interactúa.
 - Allocation model: El que pone las facilities elige cuál suple a cuál cliente.
 
+Para el problema de ubicación continuo de minisum de distancias, se tiene el método de set partitioning con la forma de column generation de Rosing o el método "alternado" de Cooper de location-allocation. Analizando el problema en redes se llegó a la conclusión de que una solución óptima se puede encontrar con instalaciones sólo en los nodos de la red (Hamiki), se tiene la location-allocation heuristic de Maranzana que es una versión nodal de el método "alternado" de Cooper, entre otras que se mencionan cerca.
+<!-- ^ TODO: Se puede señalar que el algoritmo se puede usar para intial guesses de problemas continuos usando mallas cuyas soluciones luego se pueden mejorar con estos métodos. -->
+
+<!-- TODO: Investigar sobre el maximum return on investmen problem. Me tinca que va por aquí. -->
+
+LSCP, que trata de lograr cubrir todos los clientes en una distancia maxima $S$ aunque es NP-Duro, se puede resolver fácilmente con programación lineal, eso se puede aprovechar para iterar disminuyendo la distancia máxima $S$ hasta que el número de sitios pasa de p a p+1, justo antes es la solución al minimax con p sitios.
+
 Kariv y Hakimi demostraron que el problema p-median general en un grafo es NP-Duro (1979b).
 <!-- Más adelante hay una formulación matemática de este problema. -->
 
@@ -61,7 +70,7 @@ Uncapacitated porque existen los capacitates en que hay un limite para la produc
 
 Körkel muestra la mejor metodología.
 
-Maximum Covering Location Problem (MCLP): Colocar una cantidad fija de plantas y encontrar el máximo de clientes que se pueden alcanzar.
+Maximum Covering Location Problem (MCLP): Encontrar con una cantidad rentable de plantas el máximo de clientes que se pueden alcanzar.
 <!-- Es interesante que en las características del problema que yo trato, el "tamaño" (costo) de las plantas crece con la cantidad de clientes que deben atender. Ergo, aquí no sirve la estrategia de probar con varios p hasta encontrar el máx óptimo. -->
 
 (Predominancia de soluciones de programación lineal)
