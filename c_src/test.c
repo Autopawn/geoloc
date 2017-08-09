@@ -65,9 +65,11 @@ int main(int argc, char **argv){
     int vision_range = 50;
     int board_size = 1000;
     //
-    int facility_cost = 2000;
+    int facility_cost = 500;
     int variant_gain = 300;
     int transport_cost = 1;
+    //
+    int max_to_show = 10;
     //
     lint pos_x[n_places];
     lint pos_y[n_places];
@@ -80,6 +82,11 @@ int main(int argc, char **argv){
     solution **sols = new_find_best_solutions(&prob,
         pool_size, vision_range, &n_sols);
     printf("Search done!\n");
+    // Print 10 best solutions:
+    for(int i=0;i<max_to_show;i++){
+        if(i>=n_sols) break;
+        print_solution(sols[i]);
+    }
     // Free memory
     for(int i=0;i<n_sols;i++){
         free(sols[i]);

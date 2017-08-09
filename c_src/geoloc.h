@@ -54,4 +54,19 @@ typedef struct _solution solution;
 solution **new_find_best_solutions(problem* prob,
         int pool_size, int vision_range, int *final_n);
 
+static inline void print_solution(const solution *sol){
+    printf("SOLUTION:\n");
+    printf("  Value: %lld\n",sol->value);
+    printf("  Facilities:\n");
+    for(int i=0;i<sol->n_facilities;i++){
+        printf("  %4d :",sol->facilities[i]);
+        for(int j=0;j<MAX_CLIENTS;j++){
+            if(sol->assignments[j]==sol->facilities[i]){
+                printf("%4d",j);
+            }
+        }
+        printf("\n");
+    }
+}
+
 #endif

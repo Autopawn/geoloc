@@ -210,7 +210,7 @@ solution **new_expand_solutions(const problem *prob,
             *new_sol = *sols[i];
             new_sol->next = NULL; // !
             int delta = solution_add(prob,new_sol,f);
-            // If delta is not larger than 0, or it already exists, free it.
+            // If delta is not larger than 0, or it already exists, free it, in other case, save it on the solutionset.
             if(delta<=0 || !solutionset_add(sset,new_sol)){
                 free(new_sol);
             }
