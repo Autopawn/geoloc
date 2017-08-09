@@ -34,9 +34,7 @@ int solution_equals(solution* sol_a, solution* sol_b){
 }
 
 // | Adds a facility to the solution, returns the delta of the value on the objective function.
-int solution_add(const problem *prob,
-        const int (*nearest)[MAX_FACILITIES][MAX_CLIENTS],
-        solution *sol, int newf){
+int solution_add(const problem *prob, solution *sol, int newf){
     // Check if f is already on the solution:
     for(int f=0;f<sol->n_facilities;f++){
         if(sol->facilities[f]==newf) return 0;
@@ -58,7 +56,7 @@ int solution_add(const problem *prob,
     lint delta = 0;
     // Reassign clients to the new facility, from nearest to further.
     for(int c=0;c<prob->n_clients;c++){
-        int cli = (*nearest)[newf][c];
+        int cli = prob->nearest[newf][c];
         // Distance of that client to the new facility:
         lint distance = prob->distances[newf][cli];
         if(distance>crit_rad) break;
@@ -134,7 +132,7 @@ int solutionset_add(solutionset* sset, solution *sol){
     solution **sol_pp = &sset->slots[hash_slot];
     while(*sol_pp!=NULL){
         if(solution_equals(*sol_pp,sol)) return 0;
-        *sol_pp = (*sol_pp)->next;
+        sol_pp = &(*sol_pp)->next;
     }
     *sol_pp = sol;
     sset->n_solutions += 1;
@@ -185,44 +183,43 @@ int dissimpair_node_cmp(struct avl_node *a, struct avl_node *b, void *aux){
 
 // | Compute the clients indexes sorted by distance for each facility.
 // nearest should be a [MAX_FACILITIES]x[MAX_CLIENTS] matrix.
-void problem_compute_nearest(const problem* prob,
-    int (*nearest)[MAX_FACILITIES][MAX_CLIENTS]){
+void problem_compute_nearest(problem* prob){
     // For each facility
     for(int f=0;f<prob->n_facilities;f++){
         // Sort each client index according to their distance to the facility
-        for(int c=0;c<prob->n_clients;c++) (*nearest)[f][c] = c;
+        for(int c=0;c<prob->n_clients;c++) prob->nearest[f][c] = c;
         int compare_dist_to_f(const void * a, const void * b){
             int ia = *(int*)a;
             int ib = *(int*)b;
             return prob->distances[f][ia]-prob->distances[f][ib];
         }
-        qsort((*nearest)[f],prob->n_clients,sizeof(int),compare_dist_to_f);
+        qsort(prob->nearest[f],prob->n_clients,sizeof(int),compare_dist_to_f);
     }
 }
 
 // | From n_sols solutions and an array to pointers to them (sols), create new solutions and return an array of pointers to them, also sets the out_n_sols value to the length of the created array.
 solution **new_expand_solutions(const problem *prob,
-        const int (*nearest)[MAX_FACILITIES][MAX_CLIENTS],
         solution** sols, int n_sols, int *out_n_sols){
-    solutionset sset;
-    init_solutionset(&sset);
+    solutionset *sset = malloc(sizeof(solutionset));
+    init_solutionset(sset);
     // Create solutions for the next iteration.
     for(int i=0;i<n_sols;i++){
         for(int f=0;f<prob->n_facilities;f++){
             // Create a new solution, with the old one and adding a facility.
             solution *new_sol = malloc(sizeof(solution));
-            new_sol->next = NULL;
             *new_sol = *sols[i];
-            int delta = solution_add(prob,nearest,new_sol,f);
+            new_sol->next = NULL; // !
+            int delta = solution_add(prob,new_sol,f);
             // If delta is not larger than 0, or it already exists, free it.
-            if(delta<=0 || !solutionset_add(&sset,new_sol)){
+            if(delta<=0 || !solutionset_add(sset,new_sol)){
                 free(new_sol);
             }
         }
     }
-    solution **out_sols = malloc(sizeof(solution*)*sset.n_solutions);
-    *out_n_sols = sset.n_solutions;
-    solutionset_as_array(&sset,out_sols);
+    solution **out_sols = malloc(sizeof(solution*)*sset->n_solutions);
+    *out_n_sols = sset->n_solutions;
+    solutionset_as_array(sset,out_sols);
+    free(sset);
     return out_sols;
 }
 
@@ -237,9 +234,9 @@ void reduce_solutions(const problem *prob,
     }
     qsort(sols,*n_sols,sizeof(solution*),solution_value_cmp);
     // Double linked structure to know solutions that haven't yet been discarted:
-    int discarted[*n_sols];
-    int nexts[*n_sols];
-    int prevs[*n_sols];
+    int *discarted = malloc((*n_sols)*sizeof(int));
+    int *nexts = malloc((*n_sols)*sizeof(int));
+    int *prevs = malloc((*n_sols)*sizeof(int));
     for(int i=0;i<*n_sols;i++){
         discarted[i] = 0;
         prevs[i] = i-1;
@@ -274,7 +271,8 @@ void reduce_solutions(const problem *prob,
         struct avl_node *cursor;
         if(t%clean_time==0){
             // Find obsolete pairs to destroy:
-            struct avl_node *to_destroy[n_pairs];
+            struct avl_node **to_destroy =
+                malloc(n_pairs* sizeof(struct avl_node *));
             int to_destroy_n = 0;
             cursor = avl_first(&pairs_tree);
             while(cursor){
@@ -293,6 +291,7 @@ void reduce_solutions(const problem *prob,
                 free(node);
                 n_pairs -= 1;
             }
+            free(to_destroy);
         }
         // Eliminate worst solution of most similar pair
         if(n_pairs==0) break;
@@ -304,8 +303,8 @@ void reduce_solutions(const problem *prob,
             discarted[to_delete] = 1;
             free(sols[to_delete]);
             // Update double linked list:
-            prevs[nexts[to_delete]] = prevs[to_delete];
-            nexts[prevs[to_delete]] = nexts[to_delete];
+            if(nexts[to_delete]!=-1) prevs[nexts[to_delete]] = prevs[to_delete];
+            if(prevs[to_delete]!=-1) nexts[prevs[to_delete]] = nexts[to_delete];
             // Add new pairs to replace those that will be deleted on the destroyed solution.
             int next_sol = nexts[to_delete];
             if(next_sol!=-1){
@@ -332,7 +331,8 @@ void reduce_solutions(const problem *prob,
         n_pairs -= 1;
     }
     // Free all the pairs:
-    struct avl_node *to_destroy[n_pairs];
+    struct avl_node **to_destroy =
+        malloc(n_pairs* sizeof(struct avl_node *));
     int to_destroy_n = 0;
     struct avl_node *cursor = avl_first(&pairs_tree);
     while(cursor){
@@ -344,6 +344,7 @@ void reduce_solutions(const problem *prob,
         free(_get_entry(to_destroy[i],dissimpair_node,avl));
         n_pairs -= 1;
     }
+    free(to_destroy);
     assert(n_pairs==0);
     // Set output final array:
     int new_nsols=0;
@@ -354,26 +355,38 @@ void reduce_solutions(const problem *prob,
         }
     }
     *n_sols = new_nsols;
+    // Free arrays
+    free(discarted);
+    free(nexts);
+    free(prevs);
 }
 
 
-solution **new_find_best_solutions(const problem* prob,
-        int pool_size, int vision_range){
+solution **new_find_best_solutions(problem* prob,
+        int pool_size, int vision_range, int *final_n){
     //
-    int nearest[MAX_FACILITIES][MAX_CLIENTS];
-    problem_compute_nearest(prob,&nearest);
+    printf("Computing 'nearest' table optimization...\n");
+    problem_compute_nearest(prob);
     // Place to store all the pools:
-    int pools_size[MAX_FACILITIES+1];
-    solution **pools[MAX_FACILITIES+1];
+    int pools_size[MAX_FACILITIES+1] = {0};
+    solution **pools[MAX_FACILITIES+1] = {NULL};
     // Create the first pool:
     solution empt = empty_solution();
-    pools[0][0] = &empt;
+    solution *pool0[1];
+    pool0[0] = &empt;
+    pools[0] = pool0;
     pools_size[0] = 1;
     // Create all the next pools:
     int total_pools_size = 0;
     for(int i=1;i<=MAX_FACILITIES;i++){
-        pools[i] = new_expand_solutions(prob, &nearest, pools[i-1],
+        printf("Expanding %d solutions of size %d...\n",pools_size[i-1],i-1);
+        pools[i] = new_expand_solutions(prob, pools[i-1],
             pools_size[i-1], &pools_size[i]);
+        if(pools_size[i]==0){
+            printf("No more valuable solution of size %d!\n",i);
+            break;
+        }
+        printf("Reducing %d solutions of size %d...\n",pools_size[i],i);
         reduce_solutions(prob, pools[i], &pools_size[i],
             pool_size, vision_range);
         // Realloc to reduce memory usage:
@@ -381,6 +394,7 @@ solution **new_find_best_solutions(const problem* prob,
         //
         total_pools_size += pools_size[i];
     }
+    printf("Merging pools...\n");
     // Merge all solution pointers into one final array:
     solution **final = malloc(sizeof(solution*)*total_pools_size);
     int current_sol_n = 0;
@@ -389,7 +403,7 @@ solution **new_find_best_solutions(const problem* prob,
             final[current_sol_n] = pools[i][j];
             current_sol_n += 1;
         }
-        free(pools[i]);
+        if(pools[i]!=NULL) free(pools[i]);
     }
     assert(current_sol_n==total_pools_size);
     // Sort solution pointers form best to worst value.
@@ -399,6 +413,7 @@ solution **new_find_best_solutions(const problem* prob,
         return (*bb)->value - (*aa)->value;
     }
     qsort(final,current_sol_n,sizeof(solution*),solution_value_cmp);
+    *final_n = current_sol_n;
     // Return it
     return final;
 }

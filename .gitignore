@@ -1,3 +1,6 @@
+# valgrind
+vgcore.*
+
 # Haskell:
 *.exe
 *.swp

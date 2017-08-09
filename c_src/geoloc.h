@@ -7,8 +7,8 @@
 
 #include "../lib/avltree/avltree.h"
 
-#define MAX_FACILITIES 1024
-#define MAX_CLIENTS 1024
+#define MAX_FACILITIES 512
+#define MAX_CLIENTS 512
 #define HASH_SLOTS 999983
 // ^ 2^19-7
 
@@ -30,6 +30,8 @@ typedef struct {
     // ^ Gains for connecting one weight of unit.
     lint transport_cost;
     // ^ Cost of connecting one weight of unit one unit of distance.
+    int nearest[MAX_FACILITIES][MAX_CLIENTS];
+    // ^ Optimization automatically computed.
 } problem;
 
 struct _solution {
@@ -49,7 +51,7 @@ struct _solution {
 };
 typedef struct _solution solution;
 
-solution **new_find_best_solutions(const problem* prob,
-        int pool_size, int vision_range);
+solution **new_find_best_solutions(problem* prob,
+        int pool_size, int vision_range, int *final_n);
 
 #endif
