@@ -1,6 +1,38 @@
 #include "geoloc.h"
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+// MISCELANEOUS AND COMPARISON FUNCTIONS
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+int compare_ints(const void * a, const void * b){
+    return ( *(int*)a - *(int*)b );
+}
+
+uint hash_int(uint x){
+    // Thanks to https://stackoverflow.com/a/12996028
+    x = ((x >> 16)^x)*0x45d9f3b;
+    x = ((x >> 16)^x)*0x45d9f3b;
+    x = (x >> 16)^x;
+    return x;
+}
+
+static const problem *prob_value_for_compare_dist_to_f;
+static int f_value_for_compare_dist_to_f;
+int compare_dist_to_f(const void * a, const void * b){
+    int ia = *(int*)a;
+    int ib = *(int*)b;
+    const problem *prob = prob_value_for_compare_dist_to_f;
+    const int f = f_value_for_compare_dist_to_f;
+    return prob->distances[f][ia]-prob->distances[f][ib];
+}
+
+int solution_value_cmp_inv(const void *a, const void *b){
+    solution **aa = (solution **) a;
+    solution **bb = (solution **) b;
+    return (*bb)->value - (*aa)->value;
+}
+
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // SOLUTION FUNCTIONS
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -21,9 +53,6 @@ int solution_equals(solution* sol_a, solution* sol_b){
     if(sol_a->hash!=sol_b->hash) return 0;
     if(sol_a->n_facilities!=sol_b->n_facilities) return 0;
     // Sort the facilities indexes for both solutions.
-    int compare_ints(const void * a, const void * b){
-        return ( *(int*)a - *(int*)b );
-    }
     qsort(sol_a->facilities,sol_a->n_facilities,sizeof(int),compare_ints);
     qsort(sol_b->facilities,sol_b->n_facilities,sizeof(int),compare_ints);
     // Compare each facility index:
@@ -40,13 +69,6 @@ int solution_add(const problem *prob, solution *sol, int newf){
         if(sol->facilities[f]==newf) return 0;
     }
     // Add the facility to the solution.
-    uint hash_int(uint x){
-        // Thanks to https://stackoverflow.com/a/12996028
-        x = ((x >> 16)^x)*0x45d9f3b;
-        x = ((x >> 16)^x)*0x45d9f3b;
-        x = (x >> 16)^x;
-        return x;
-    }
     sol->facilities[sol->n_facilities] = newf;
     sol->n_facilities += 1;
     sol->hash = sol->hash ^ hash_int(newf);
@@ -188,11 +210,8 @@ void problem_compute_nearest(problem* prob){
     for(int f=0;f<prob->n_facilities;f++){
         // Sort each client index according to their distance to the facility
         for(int c=0;c<prob->n_clients;c++) prob->nearest[f][c] = c;
-        int compare_dist_to_f(const void * a, const void * b){
-            int ia = *(int*)a;
-            int ib = *(int*)b;
-            return prob->distances[f][ia]-prob->distances[f][ib];
-        }
+        f_value_for_compare_dist_to_f = f;
+        prob_value_for_compare_dist_to_f = prob;
         qsort(prob->nearest[f],prob->n_clients,sizeof(int),compare_dist_to_f);
     }
 }
@@ -227,12 +246,7 @@ solution **new_expand_solutions(const problem *prob,
 void reduce_solutions(const problem *prob,
         solution **sols, int *n_sols, int target_n, int vision_range){
     // Sort solution pointers from larger to smaller value of the solution.
-    int solution_value_cmp(const void *a, const void *b){
-        solution **aa = (solution **) a;
-        solution **bb = (solution **) b;
-        return (*bb)->value - (*aa)->value;
-    }
-    qsort(sols,*n_sols,sizeof(solution*),solution_value_cmp);
+    qsort(sols,*n_sols,sizeof(solution*),solution_value_cmp_inv);
     // Double linked structure to know solutions that haven't yet been discarted:
     int *discarted = malloc((*n_sols)*sizeof(int));
     int *nexts = malloc((*n_sols)*sizeof(int));
@@ -266,10 +280,11 @@ void reduce_solutions(const problem *prob,
     if(clean_time==0) clean_time=1;
     // Eliminate as much solutions as required:
     int n_eliminate = *n_sols-target_n;
-    for(int t=1;t<=n_eliminate;t++){
+    int elims = 0;
+    while(elims<n_eliminate){
         dissimpair_node *node;
         struct avl_node *cursor;
-        if(t%clean_time==0){
+        if((elims+1)%clean_time==0){
             // Find obsolete pairs to destroy:
             struct avl_node **to_destroy =
                 malloc(n_pairs* sizeof(struct avl_node *));
@@ -303,6 +318,7 @@ void reduce_solutions(const problem *prob,
             int to_delete = node->indx_b;
             discarted[to_delete] = 1;
             free(sols[to_delete]);
+            elims += 1;
             // Update double linked list:
             if(nexts[to_delete]!=-1) prevs[nexts[to_delete]] = prevs[to_delete];
             if(prevs[to_delete]!=-1) nexts[prevs[to_delete]] = nexts[to_delete];
@@ -432,12 +448,7 @@ solution **new_find_best_solutions(problem* prob,
     }
     assert(current_sol_n==total_pools_size);
     // Sort solution pointers form best to worst value.
-    int solution_value_cmp(const void *a, const void *b){
-        solution **aa = (solution **) a;
-        solution **bb = (solution **) b;
-        return (*bb)->value - (*aa)->value;
-    }
-    qsort(final,current_sol_n,sizeof(solution*),solution_value_cmp);
+    qsort(final,current_sol_n,sizeof(solution*),solution_value_cmp_inv);
     *final_n = current_sol_n;
     // Return it
     return final;
