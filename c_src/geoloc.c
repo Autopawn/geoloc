@@ -65,18 +65,18 @@ int solution_add(const problem *prob, solution *sol, int newf){
         if(sol->assignments[cli]!=-1){
             old_distance = prob->distances[sol->assignments[cli]][cli];
         }
-        if(sol->assignments[cli]==-1 || distance<old_distance){
+        if(old_distance==-1 || distance<old_distance){
             // ^ If client not assigned, or is nearest to the new facility assign it.
-            // Gain for the new assignation:
+            // Gain of the new assignation:
             delta += prob->weights[cli]*
                 (prob->variant_gain-prob->transport_cost*distance);
-            // Loss of the previous assignation:
-            if(sol->assignments[cli]!=-1){
+            // Lost the previous assignation:
+            if(old_distance!=-1){
                 delta -= prob->weights[cli]*
                     (prob->variant_gain-prob->transport_cost*old_distance);
             }
-            // Reassignation:
-            sol->assignments[cli]= newf;
+            // Reassign client to new facility
+            sol->assignments[cli] = newf;
         }
     }
     // The constant cost of a facility:
@@ -249,7 +249,7 @@ void reduce_solutions(const problem *prob,
     struct avl_tree pairs_tree;
     avl_init(&pairs_tree, NULL);
     for(int i=0;i<*n_sols;i++){
-        for(int j=0;j<vision_range;j++){
+        for(int j=1;j<=vision_range;j++){
             if(i+j>=*n_sols) break;
             dissimpair_node *node = (dissimpair_node*)
                 malloc(sizeof(dissimpair_node));
@@ -288,8 +288,8 @@ void reduce_solutions(const problem *prob,
                 cursor = to_destroy[i];
                 node = _get_entry(cursor,dissimpair_node,avl);
                 avl_remove(&pairs_tree,cursor);
-                free(node);
                 n_pairs -= 1;
+                free(node);
             }
             free(to_destroy);
         }
@@ -298,6 +298,7 @@ void reduce_solutions(const problem *prob,
         cursor = avl_first(&pairs_tree);
         node = _get_entry(cursor,dissimpair_node,avl);
         if(!discarted[node->indx_a] && !discarted[node->indx_b]){
+            // printf("%6d%6d-%8lld\n",node->indx_a,node->indx_b,node->dissim);
             // Delete the second solution on the pair.
             int to_delete = node->indx_b;
             discarted[to_delete] = 1;
@@ -306,29 +307,53 @@ void reduce_solutions(const problem *prob,
             if(nexts[to_delete]!=-1) prevs[nexts[to_delete]] = prevs[to_delete];
             if(prevs[to_delete]!=-1) nexts[prevs[to_delete]] = nexts[to_delete];
             // Add new pairs to replace those that will be deleted on the destroyed solution.
-            int next_sol = nexts[to_delete];
-            if(next_sol!=-1){
-                int current_sol = prevs[to_delete];
-                for(int k=0;k<vision_range;k++){
-                    if(current_sol==-1) break;
+            int *prev_nodes = malloc(sizeof(int)*vision_range);
+            int *next_nodes = malloc(sizeof(int)*vision_range);
+            int iter;
+            // Get solutions after
+            iter = to_delete;
+            for(int i=0;i<vision_range;i++){
+                if(nexts[iter]==-1){
+                    next_nodes[i] = -1;
+                }else{
+                    iter = nexts[iter];
+                    next_nodes[i] = iter;
+                }
+            }
+            // Get solutions before
+            iter = to_delete;
+            for(int i=0;i<vision_range;i++){
+                if(prevs[iter]==-1){
+                    prev_nodes[i] = -1;
+                }else{
+                    iter = prevs[iter];
+                    prev_nodes[i] = iter;
+                }
+            }
+            // Create new pairs
+            for(int i=0;i<vision_range;i++){
+                int pair_a = prev_nodes[vision_range-1-i];
+                int pair_b = next_nodes[i];
+                if(pair_a!=-1 && pair_b!=-1){
                     // Create the replace node:
                     dissimpair_node *new_node = (dissimpair_node*)
                         malloc(sizeof(dissimpair_node));
-                    new_node->indx_a = current_sol;
-                    new_node->indx_b = next_sol;
+                    new_node->indx_a = pair_a;
+                    new_node->indx_b = pair_b;
                     new_node-> dissim = solution_dissimilitude(prob,
                         sols[new_node->indx_a],sols[new_node->indx_b]);
                     avl_insert(&pairs_tree,&new_node->avl,dissimpair_node_cmp);
                     n_pairs += 1;
-                    //
-                    current_sol = prevs[current_sol];
                 }
             }
+            //
+            free(prev_nodes);
+            free(next_nodes);
         }
         // Delete the pair:
         avl_remove(&pairs_tree,cursor);
-        free(node);
         n_pairs -= 1;
+        free(node);
     }
     // Free all the pairs:
     struct avl_node **to_destroy =

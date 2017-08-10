@@ -57,18 +57,18 @@ int main(int argc, char **argv){
     time(&second);
     int seed = (int) second;
     if(seed<0) seed*=-1;
-    seed = 1502255706; // NOTE: Hardcoded seed.
     printf("seed: %d\n", seed);
-    //
-    int n_places = 100;
+    // Algorithm parameters:
     int pool_size = 500;
-    int vision_range = 50;
+    int vision_range = 100;
+    // Problem parameters:
+    int n_places = 40;
     int board_size = 1000;
-    //
-    int facility_cost = 500;
+    // Problem constants:
+    int facility_cost = 600;
     int variant_gain = 300;
     int transport_cost = 1;
-    //
+    // Output:
     int max_to_show = 10;
     //
     lint pos_x[n_places];
@@ -82,11 +82,15 @@ int main(int argc, char **argv){
     solution **sols = new_find_best_solutions(&prob,
         pool_size, vision_range, &n_sols);
     printf("Search done!\n");
-    // Print 10 best solutions:
+    // Print 10 best solutions
     for(int i=0;i<max_to_show;i++){
         if(i>=n_sols) break;
         print_solution(sols[i]);
     }
+    // Save best solution on asy file:
+    save_solution_asy("best_sol.asy",
+        pos_x,pos_y,n_places,pos_x,pos_y,n_places,
+        sols[0],100.0/board_size);
     // Free memory
     for(int i=0;i<n_sols;i++){
         free(sols[i]);
