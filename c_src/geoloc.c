@@ -4,7 +4,7 @@
 // MISCELANEOUS AND COMPARISON FUNCTIONS
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-inline void *smalloc(size_t size){
+inline void *safe_malloc(size_t size){
     void *ptr = malloc(size);
     if(size>0 && ptr==NULL){
         printf("ERROR: Not enough memory!\n");
@@ -249,13 +249,13 @@ void problem_compute_nearest(problem* prob){
 // | From n_sols solutions and an array to pointers to them (sols), create new solutions and return an array of pointers to them, also sets the out_n_sols value to the length of the created array.
 solution **new_expand_solutions(const problem *prob,
         solution** sols, int n_sols, int *out_n_sols){
-    solutionset *sset = malloc(sizeof(solutionset));
+    solutionset *sset = safe_malloc(sizeof(solutionset));
     init_solutionset(sset);
     // Create solutions for the next iteration.
     for(int i=0;i<n_sols;i++){
         for(int f=0;f<prob->n_facilities;f++){
             // Create a new solution, with the old one and adding a facility.
-            solution *new_sol = malloc(sizeof(solution));
+            solution *new_sol = safe_malloc(sizeof(solution));
             *new_sol = *sols[i];
             new_sol->next = NULL; // !
             lint delta = solution_add(prob,new_sol,f);
@@ -265,7 +265,7 @@ solution **new_expand_solutions(const problem *prob,
             }
         }
     }
-    solution **out_sols = malloc(sizeof(solution*)*sset->n_solutions);
+    solution **out_sols = safe_malloc(sizeof(solution*)*sset->n_solutions);
     *out_n_sols = sset->n_solutions;
     solutionset_as_array(sset,out_sols);
     free(sset);
@@ -278,9 +278,9 @@ void reduce_solutions(const problem *prob,
     // Sort solution pointers from larger to smaller value of the solution.
     qsort(sols,*n_sols,sizeof(solution*),solution_value_cmp_inv);
     // Double linked structure to know solutions that haven't yet been discarted:
-    int *discarted = malloc((*n_sols)*sizeof(int));
-    int *nexts = malloc((*n_sols)*sizeof(int));
-    int *prevs = malloc((*n_sols)*sizeof(int));
+    int *discarted = safe_malloc((*n_sols)*sizeof(int));
+    int *nexts = safe_malloc((*n_sols)*sizeof(int));
+    int *prevs = safe_malloc((*n_sols)*sizeof(int));
     for(int i=0;i<*n_sols;i++){
         discarted[i] = 0;
         prevs[i] = i-1;
@@ -290,7 +290,7 @@ void reduce_solutions(const problem *prob,
     nexts[*n_sols-1] = -1;
     // Heap of dissimilitude pairs
     int n_pairs = 0;
-    dissimpair *heap = malloc(sizeof(dissimpair)*2*(*n_sols)*vision_range);
+    dissimpair *heap = safe_malloc(sizeof(dissimpair)*2*(*n_sols)*vision_range);
     // Initial set of dissimilitude pairs
     for(int i=0;i<*n_sols;i++){
         for(int j=1;j<=vision_range;j++){
@@ -321,8 +321,8 @@ void reduce_solutions(const problem *prob,
             if(nexts[to_delete]!=-1) prevs[nexts[to_delete]] = prevs[to_delete];
             if(prevs[to_delete]!=-1) nexts[prevs[to_delete]] = nexts[to_delete];
             // Add new pairs to replace those that will be deleted on the destroyed solution.
-            int *prev_sols = malloc(sizeof(int)*vision_range);
-            int *next_sols = malloc(sizeof(int)*vision_range);
+            int *prev_sols = safe_malloc(sizeof(int)*vision_range);
+            int *next_sols = safe_malloc(sizeof(int)*vision_range);
             int iter;
             // Get solutions after
             iter = to_delete;
@@ -417,7 +417,7 @@ solution **new_find_best_solutions(problem* prob,
     }
     printf("Merging pools...\n");
     // Merge all solution pointers into one final array:
-    solution **final = malloc(sizeof(solution*)*total_pools_size);
+    solution **final = safe_malloc(sizeof(solution*)*total_pools_size);
     int current_sol_n = 0;
     for(int i=1;i<=MAX_FACILITIES;i++){
         for(int j=0;j<pools_size[i];j++){
