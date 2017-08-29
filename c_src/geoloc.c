@@ -4,6 +4,15 @@
 // MISCELANEOUS AND COMPARISON FUNCTIONS
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+inline void *smalloc(size_t size){
+    void *ptr = malloc(size);
+    if(size>0 && ptr==NULL){
+        printf("ERROR: Not enough memory!\n");
+        exit(1);
+    }
+    return ptr;
+}
+
 int compare_ints(const void * a, const void * b){
     return ( *(int*)a - *(int*)b );
 }
@@ -63,7 +72,7 @@ int solution_equals(solution* sol_a, solution* sol_b){
 }
 
 // | Adds a facility to the solution, returns the delta of the value on the objective function.
-int solution_add(const problem *prob, solution *sol, int newf){
+lint solution_add(const problem *prob, solution *sol, int newf){
     // Check if f is already on the solution:
     for(int f=0;f<sol->n_facilities;f++){
         if(sol->facilities[f]==newf) return 0;
@@ -177,26 +186,47 @@ void solutionset_as_array(solutionset* sset, solution** out_sols){
 }
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// DISSIMILITUDE PAIRS
+// DISSIMILITUDE PAIRS HEAP
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-// A dissimilitude pair node:
-typedef struct {
-    struct avl_node avl;
-    // Solution indexes and their dissimilitudes:
-    int indx_a, indx_b;
+typedef struct{
     lint dissim;
-} dissimpair_node;
+    unsigned short indx_a, indx_b;
+} dissimpair;
 
-// Function that compares two dissimpair_nodes
-int dissimpair_node_cmp(struct avl_node *a, struct avl_node *b, void *aux){
-    dissimpair_node *aa = _get_entry(a,dissimpair_node,avl);
-    dissimpair_node *bb = _get_entry(b,dissimpair_node,avl);
-    lint delta = aa->dissim-bb->dissim;
-    if(delta!=0) return delta;
-    delta = aa->indx_a-bb->indx_a;
-    if(delta!=0) return delta;
-    return aa->indx_b-bb->indx_b;
+dissimpair heap_poll(dissimpair *heap, int *size){
+    dissimpair retp = heap[0];
+    heap[0] = heap[*size-1];
+    *size -= 1;
+    // Heapify down:
+    int i = 0;
+    int c = 2*i+1;
+    while(c<*size){
+        if(c+1<*size && heap[c+1].dissim<heap[c].dissim) c = c+1;
+        if(heap[i].dissim<heap[c].dissim) break;
+        dissimpair aux = heap[i];
+        heap[i] = heap[c];
+        heap[c] = aux;
+        i = c;
+        c = 2*i+1;
+    }
+    //
+    return retp;
+}
+
+void heap_add(dissimpair *heap, int *size, dissimpair val){
+    heap[*size] = val;
+    *size += 1;
+    // Heapify up:
+    int i = *size-1;
+    int p = (i-1)/2;
+    while(p>=0 && heap[i].dissim<heap[p].dissim){
+        dissimpair aux = heap[i];
+        heap[i] = heap[p];
+        heap[p] = aux;
+        i = p;
+        p = (i-1)/2;
+    }
 }
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -228,7 +258,7 @@ solution **new_expand_solutions(const problem *prob,
             solution *new_sol = malloc(sizeof(solution));
             *new_sol = *sols[i];
             new_sol->next = NULL; // !
-            int delta = solution_add(prob,new_sol,f);
+            lint delta = solution_add(prob,new_sol,f);
             // If delta is not larger than 0, or it already exists, free it, in other case, save it on the solutionset.
             if(delta<=0 || !solutionset_add(sset,new_sol)){
                 free(new_sol);
@@ -258,64 +288,32 @@ void reduce_solutions(const problem *prob,
     }
     prevs[0] = -1;
     nexts[*n_sols-1] = -1;
-    // Initial set of dissimilitude pairs
+    // Heap of dissimilitude pairs
     int n_pairs = 0;
-    struct avl_tree pairs_tree;
-    avl_init(&pairs_tree, NULL);
+    dissimpair *heap = malloc(sizeof(dissimpair)*2*(*n_sols)*vision_range);
+    // Initial set of dissimilitude pairs
     for(int i=0;i<*n_sols;i++){
         for(int j=1;j<=vision_range;j++){
             if(i+j>=*n_sols) break;
-            dissimpair_node *node = (dissimpair_node*)
-                malloc(sizeof(dissimpair_node));
-            node->indx_a = i;
-            node->indx_b = i+j;
-            node->dissim = solution_dissimilitude(prob,
-                sols[node->indx_a],sols[node->indx_b]);
-            avl_insert(&pairs_tree,&node->avl,dissimpair_node_cmp);
-            n_pairs += 1;
+            dissimpair dp;
+            dp.indx_a = i;
+            dp.indx_b = i+j;
+            dp.dissim = solution_dissimilitude(prob,
+                sols[dp.indx_a],sols[dp.indx_b]);
+            heap_add(heap,&n_pairs,dp);
         }
     }
-    // | Calculate the obsolete pairs cleanning time (done so that memory complexity doens't augment, value chosen to that time complexity doesn't augment):
-    int clean_time = *n_sols/vision_range;
-    if(clean_time==0) clean_time=1;
     // Eliminate as much solutions as required:
     int n_eliminate = *n_sols-target_n;
     int elims = 0;
     while(elims<n_eliminate){
-        dissimpair_node *node;
-        struct avl_node *cursor;
-        if((elims+1)%clean_time==0){
-            // Find obsolete pairs to destroy:
-            struct avl_node **to_destroy =
-                malloc(n_pairs* sizeof(struct avl_node *));
-            int to_destroy_n = 0;
-            cursor = avl_first(&pairs_tree);
-            while(cursor){
-                node = _get_entry(cursor,dissimpair_node,avl);
-                if(discarted[node->indx_a] || discarted[node->indx_b]){
-                    to_destroy[to_destroy_n] = cursor;
-                    to_destroy_n += 1;
-                }
-                cursor = avl_next(cursor);
-            }
-            // Destroy obsolete pairs:
-            for(int i=0;i<to_destroy_n;i++){
-                cursor = to_destroy[i];
-                node = _get_entry(cursor,dissimpair_node,avl);
-                avl_remove(&pairs_tree,cursor);
-                n_pairs -= 1;
-                free(node);
-            }
-            free(to_destroy);
-        }
         // Eliminate worst solution of most similar pair
         if(n_pairs==0) break;
-        cursor = avl_first(&pairs_tree);
-        node = _get_entry(cursor,dissimpair_node,avl);
-        if(!discarted[node->indx_a] && !discarted[node->indx_b]){
-            // printf("%6d%6d-%8lld\n",node->indx_a,node->indx_b,node->dissim);
+        dissimpair pair = heap_poll(heap,&n_pairs);
+        if(!discarted[pair.indx_a] && !discarted[pair.indx_b]){
+            // printf("%6d%6d-%8lld\n",pair.indx_a,pair.indx_b,pair.dissim);
             // Delete the second solution on the pair.
-            int to_delete = node->indx_b;
+            int to_delete = pair.indx_b;
             discarted[to_delete] = 1;
             free(sols[to_delete]);
             elims += 1;
@@ -323,70 +321,52 @@ void reduce_solutions(const problem *prob,
             if(nexts[to_delete]!=-1) prevs[nexts[to_delete]] = prevs[to_delete];
             if(prevs[to_delete]!=-1) nexts[prevs[to_delete]] = nexts[to_delete];
             // Add new pairs to replace those that will be deleted on the destroyed solution.
-            int *prev_nodes = malloc(sizeof(int)*vision_range);
-            int *next_nodes = malloc(sizeof(int)*vision_range);
+            int *prev_sols = malloc(sizeof(int)*vision_range);
+            int *next_sols = malloc(sizeof(int)*vision_range);
             int iter;
             // Get solutions after
             iter = to_delete;
             for(int i=0;i<vision_range;i++){
                 if(nexts[iter]==-1){
-                    next_nodes[i] = -1;
+                    next_sols[i] = -1;
                 }else{
                     iter = nexts[iter];
-                    next_nodes[i] = iter;
+                    next_sols[i] = iter;
                 }
             }
             // Get solutions before
             iter = to_delete;
             for(int i=0;i<vision_range;i++){
                 if(prevs[iter]==-1){
-                    prev_nodes[i] = -1;
+                    prev_sols[i] = -1;
                 }else{
                     iter = prevs[iter];
-                    prev_nodes[i] = iter;
+                    prev_sols[i] = iter;
                 }
             }
             // Create new pairs
             for(int i=0;i<vision_range;i++){
-                int pair_a = prev_nodes[vision_range-1-i];
-                int pair_b = next_nodes[i];
+                int pair_a = prev_sols[vision_range-1-i];
+                int pair_b = next_sols[i];
                 if(pair_a!=-1 && pair_b!=-1){
                     // Create the replace node:
-                    dissimpair_node *new_node = (dissimpair_node*)
-                        malloc(sizeof(dissimpair_node));
-                    new_node->indx_a = pair_a;
-                    new_node->indx_b = pair_b;
-                    new_node-> dissim = solution_dissimilitude(prob,
-                        sols[new_node->indx_a],sols[new_node->indx_b]);
-                    avl_insert(&pairs_tree,&new_node->avl,dissimpair_node_cmp);
-                    n_pairs += 1;
+                    dissimpair pair;
+                    pair.indx_a = pair_a;
+                    pair.indx_b = pair_b;
+                    pair.dissim = solution_dissimilitude(prob,
+                        sols[pair.indx_a],sols[pair.indx_b]);
+                    assert(n_pairs<2*(*n_sols)*vision_range);
+                    heap_add(heap,&n_pairs,pair);
                 }
             }
             //
-            free(prev_nodes);
-            free(next_nodes);
+            free(prev_sols);
+            free(next_sols);
         }
-        // Delete the pair:
-        avl_remove(&pairs_tree,cursor);
-        n_pairs -= 1;
-        free(node);
     }
     // Free all the pairs:
-    struct avl_node **to_destroy =
-        malloc(n_pairs* sizeof(struct avl_node *));
-    int to_destroy_n = 0;
-    struct avl_node *cursor = avl_first(&pairs_tree);
-    while(cursor){
-        to_destroy[to_destroy_n] = cursor;
-        to_destroy_n += 1;
-        cursor = avl_next(cursor);
-    }
-    for(int i=0;i<to_destroy_n;i++){
-        free(_get_entry(to_destroy[i],dissimpair_node,avl));
-        n_pairs -= 1;
-    }
-    free(to_destroy);
-    assert(n_pairs==0);
+    free(heap);
+    n_pairs = 0;
     // Set output final array:
     int new_nsols=0;
     for(int i=0;i<*n_sols;i++){

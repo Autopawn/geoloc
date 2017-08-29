@@ -5,17 +5,16 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "../lib/avltree/avltree.h"
-
 #define MAX_FACILITIES 512
 #define MAX_CLIENTS 512
+
 #define HASH_SLOTS 999983
 // ^ 2^19-7
 
 typedef long long int lint;
 typedef unsigned int uint;
 
-typedef struct {
+typedef struct{
     int n_facilities, n_clients;
     // ^ Number of facilities and clients.
     int weights[MAX_CLIENTS];
@@ -38,17 +37,17 @@ struct _solution {
     int n_facilities;
     // ^ Number of facilities in this solution.
     int facilities[MAX_FACILITIES];
-    // ^ Facilities
+    // ^ Facilities from the smaller index to the larger one.
     int assignments[MAX_CLIENTS];
     // ^ Which facility is working each client.
     lint value;
     // ^ Value of this solution on the objective function.
-
     uint hash;
     // ^ Current hash for the solution, and if it is valid or it should be recomputed.
     struct _solution* next;
     // ^ Pointer to be used on a linked list, a solution can only stay in one linked list at the same time.
 };
+
 typedef struct _solution solution;
 
 solution **new_find_best_solutions(problem* prob,
