@@ -6,7 +6,9 @@ hstest:
 	cd hs_src; ghc -O2 Test.hs -o ../htest.exe
 ctest:
 	cd c_src; gcc -O -Wall -lm geoloc.c test.c -o ../ctest.exe
-ctesttest:
+ctest_verbose:
+	cd c_src; gcc -O -Wall -lm geoloc.c test.c -D VERBOSE -o ../ctest.exe
+ctest_test:
 	cd c_src; gcc -O -g -Wall -lm geoloc.c test.c -o ../ctest.exe
 	valgrind --tool=memcheck --leak-check=yes ./ctest.exe
 document:

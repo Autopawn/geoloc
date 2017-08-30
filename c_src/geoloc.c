@@ -414,6 +414,10 @@ solution **new_find_best_solutions(problem* prob,
         printf("Expanding %d solutions of size %d...\n",pools_size[i-1],i-1);
         pools[i] = new_expand_solutions(prob, pools[i-1],
             pools_size[i-1], &pools_size[i]);
+        #ifdef VERBOSE
+        printf("Base %d:\n",i);
+        print_solutions(pools[i],pools_size[i]);
+        #endif
         if(pools_size[i]==0){
             printf("No more valuable solution of size %d!\n",i);
             break;
@@ -424,6 +428,10 @@ solution **new_find_best_solutions(problem* prob,
         // Realloc to reduce memory usage:
         pools[i] = realloc(pools[i],sizeof(solution*)*pools_size[i]);
         //
+        #ifdef VERBOSE
+        printf("Pool %d:\n",i);
+        print_solutions(pools[i],pools_size[i]);
+        #endif
         total_pools_size += pools_size[i];
     }
     printf("Merging pools...\n");

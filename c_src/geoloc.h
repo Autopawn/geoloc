@@ -63,6 +63,20 @@ static inline void print_solution(const solution *sol){
     }
 }
 
+static inline void print_solutions(solution **sols, int n_sols){
+    printf("{");
+    for(int i=0;i<n_sols;i++){
+        printf("{");
+        for(int k=0;k<sols[i]->n_facilities;k++){
+            printf("%d",sols[i]->facilities[k]);
+            if(k<sols[i]->n_facilities-1)printf(",");
+        }
+        printf("}");
+        if(i<n_sols-1)printf(",");
+    }
+    printf("}\n");
+}
+
 static inline void save_solution_asy(const char *fname,
         const lint *cli_xs, const lint *cli_ys, int n_clis,
         const lint *fac_xs, const lint *fac_ys, int n_facs,

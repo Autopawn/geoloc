@@ -59,17 +59,24 @@ int main(int argc, char **argv){
     if(seed<0) seed*=-1;
     printf("seed: %d\n", seed);
     // Algorithm parameters:
-    int pool_size = 500;
+    int pool_size = 4;
     int vision_range = 100;
     // Problem parameters:
-    int n_places = 40;
+    int n_places = 5;
     int board_size = 1000;
     // Problem constants:
-    int facility_cost = 600;
+    int facility_cost = 200;
     int variant_gain = 300;
     int transport_cost = 1;
     // Output:
     int max_to_show = 10;
+    // Print parameters
+    printf("Pool size: %d\n",pool_size);
+    printf("Vision range: %d\n",vision_range);
+    printf("N places: %d\n",n_places);
+    printf("facility cost:  %d\n",facility_cost);
+    printf("variant_gain:   %d\n",variant_gain);
+    printf("transport cost: %d\n",transport_cost);
     //
     lint pos_x[n_places];
     lint pos_y[n_places];
