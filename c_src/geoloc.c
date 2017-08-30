@@ -13,10 +13,6 @@ inline void *safe_malloc(size_t size){
     return ptr;
 }
 
-int compare_ints(const void * a, const void * b){
-    return ( *(int*)a - *(int*)b );
-}
-
 uint hash_int(uint x){
     // Thanks to https://stackoverflow.com/a/12996028
     x = ((x >> 16)^x)*0x45d9f3b;
@@ -41,6 +37,17 @@ int solution_value_cmp_inv(const void *a, const void *b){
     return (*bb)->value - (*aa)->value;
 }
 
+void add_to_sorted(int *array, int *len, int val){
+    int place = *len;
+    while(place>0){
+        if(array[place-1]<=val) break;
+        array[place] = array[place-1];
+        place--;
+    }
+    array[place] = val;
+    *len += 1;
+}
+
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // SOLUTION FUNCTIONS
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -51,24 +58,7 @@ solution empty_solution(){
     sol.n_facilities = 0;
     for(int c=0;c<MAX_CLIENTS;c++) sol.assignments[c] = -1;
     sol.value = 0;
-    sol.hash = 0;
-    sol.next = NULL;
     return sol;
-}
-
-// | Checks if two solutions are the same:
-int solution_equals(solution* sol_a, solution* sol_b){
-    // Check basic values:
-    if(sol_a->hash!=sol_b->hash) return 0;
-    if(sol_a->n_facilities!=sol_b->n_facilities) return 0;
-    // Sort the facilities indexes for both solutions.
-    qsort(sol_a->facilities,sol_a->n_facilities,sizeof(int),compare_ints);
-    qsort(sol_b->facilities,sol_b->n_facilities,sizeof(int),compare_ints);
-    // Compare each facility index:
-    for(int i=0;i<sol_a->n_facilities;i++){
-        if(sol_a->facilities[i]!=sol_b->facilities[i]) return 0;
-    }
-    return 1;
 }
 
 // | Adds a facility to the solution, returns the delta of the value on the objective function.
@@ -78,9 +68,7 @@ lint solution_add(const problem *prob, solution *sol, int newf){
         if(sol->facilities[f]==newf) return 0;
     }
     // Add the facility to the solution.
-    sol->facilities[sol->n_facilities] = newf;
-    sol->n_facilities += 1;
-    sol->hash = sol->hash ^ hash_int(newf);
+    add_to_sorted(sol->facilities,&sol->n_facilities,newf);
     // | Critical radious.
     lint crit_rad = prob->variant_gain/prob->transport_cost;
     // | Difference on the value after adding the new facility.
@@ -142,56 +130,39 @@ lint solution_dissimilitude(const problem *prob,
 }
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// SOLUTIONSET
+// FUTURESOL
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 typedef struct {
-    solution* slots[HASH_SLOTS];
-    // ^ Hash table for solutions.
-    int n_solutions;
-} solutionset;
+    solution *origin;
+    int newf;
+    uint hash;
+    int n_facilities;
+    int facilities[0]; // Flexible array member.
+} futuresol;
 
-void init_solutionset(solutionset* sset){
-    for(int i=0;i<HASH_SLOTS;i++) sset->slots[i] = NULL;
-    sset->n_solutions = 0;
-}
-
-// | Adds a solution to a solutionset, returning 1 if it didn't exist already.
-int solutionset_add(solutionset* sset, solution *sol){
-    assert(sol->next==NULL);
-    int hash_slot = sol->hash%HASH_SLOTS;
-    solution **sol_pp = &sset->slots[hash_slot];
-    while(*sol_pp!=NULL){
-        if(solution_equals(*sol_pp,sol)) return 0;
-        sol_pp = &(*sol_pp)->next;
+int futuresol_cmp(const void *a, const void *b){
+    const futuresol *aa = (const futuresol *) a;
+    const futuresol *bb = (const futuresol *) b;
+    if(aa->hash>bb->hash) return +1;
+    if(aa->hash<bb->hash) return -1;
+    int nf_delta = aa->n_facilities - bb->n_facilities;
+    if(nf_delta!=0) return nf_delta;
+    for(int i=0;i<aa->n_facilities;i++){
+        int idx_delta = aa->facilities[i]-bb->facilities[i];
+        if(idx_delta!=0) return idx_delta;
     }
-    *sol_pp = sol;
-    sset->n_solutions += 1;
-    return 1;
-}
-
-// | Sets an array (out_sols) with the pointers of all the solutions, out_sols must have length of at least sset->n_solutions solution pointers.
-void solutionset_as_array(solutionset* sset, solution** out_sols){
-    int n_sols = 0;
-    //
-    for(int i=0;i<HASH_SLOTS;i++){
-        solution *sol_p = sset->slots[i];
-        while(sol_p!=NULL){
-            out_sols[n_sols] = sol_p;
-            n_sols += 1;
-            sol_p = sol_p->next;
-        }
-    }
-    assert(n_sols==sset->n_solutions);
+    return 0;
 }
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // DISSIMILITUDE PAIRS HEAP
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+// NOTE: Is possible to change lint->float and int->ushort to use half of the memory saving pair data.
 typedef struct{
     lint dissim;
-    unsigned short indx_a, indx_b;
+    int indx_a, indx_b;
 } dissimpair;
 
 dissimpair heap_poll(dissimpair *heap, int *size){
@@ -249,26 +220,66 @@ void problem_compute_nearest(problem* prob){
 // | From n_sols solutions and an array to pointers to them (sols), create new solutions and return an array of pointers to them, also sets the out_n_sols value to the length of the created array.
 solution **new_expand_solutions(const problem *prob,
         solution** sols, int n_sols, int *out_n_sols){
-    solutionset *sset = safe_malloc(sizeof(solutionset));
-    init_solutionset(sset);
+    int csize = sols[0]->n_facilities;
+    size_t fsol_size = sizeof(futuresol)+sizeof(int)*(csize+1);
+    void *futuresols = safe_malloc(fsol_size*n_sols*prob->n_facilities);
+    int n_futuresols = 0;
     // Create solutions for the next iteration.
     for(int i=0;i<n_sols;i++){
+        assert(sols[i]->n_facilities==csize);
         for(int f=0;f<prob->n_facilities;f++){
-            // Create a new solution, with the old one and adding a facility.
-            solution *new_sol = safe_malloc(sizeof(solution));
-            *new_sol = *sols[i];
-            new_sol->next = NULL; // !
-            lint delta = solution_add(prob,new_sol,f);
-            // If delta is not larger than 0, or it already exists, free it, in other case, save it on the solutionset.
-            if(delta<=0 || !solutionset_add(sset,new_sol)){
-                free(new_sol);
+            futuresol *fsol = (futuresol *)(futuresols+fsol_size*n_futuresols);
+            // Create a potential future solution, with the old one and adding a facility.
+            fsol->origin = sols[i];
+            fsol->newf = f;
+            fsol->hash = hash_int(fsol->newf);
+            fsol->n_facilities = csize;
+            // Copy its facilities, and check if f already exists.
+            int f_is_new=1;
+            for(int k=0;k<csize;k++){
+                if(sols[i]->facilities[k]==f){
+                    f_is_new = 0;
+                    break;
+                }
+                fsol->facilities[k] = sols[i]->facilities[k];
+                fsol->hash = fsol->hash ^ hash_int(sols[i]->facilities[k]);
             }
+            if(!f_is_new) continue;
+            add_to_sorted(fsol->facilities,&fsol->n_facilities,f);
+            n_futuresols += 1;
         }
     }
-    solution **out_sols = safe_malloc(sizeof(solution*)*sset->n_solutions);
-    *out_n_sols = sset->n_solutions;
-    solutionset_as_array(sset,out_sols);
-    free(sset);
+    // Sort futuresols to detect the ones that are the same faster.
+    qsort(futuresols,n_futuresols,fsol_size,futuresol_cmp);
+    int new_n_futuresols = 0;
+    futuresol *last_fsol = NULL;
+    for(int r=0;r<n_futuresols;r++){
+        futuresol *fsol = (futuresol *)(futuresols+fsol_size*r);
+        if(last_fsol==NULL || futuresol_cmp(last_fsol,fsol)!=0){
+            futuresol *next_pos = (futuresol *)
+                (futuresols+fsol_size*new_n_futuresols);
+            memcpy(next_pos,fsol,fsol_size);
+            last_fsol = next_pos;
+            new_n_futuresols += 1;
+        }
+    }
+    n_futuresols = new_n_futuresols;
+    // Create the new solutions:
+    solution **out_sols = safe_malloc(sizeof(solution*)*n_futuresols);
+    *out_n_sols = 0;
+    for(int r=0;r<n_futuresols;r++){
+        futuresol *fsol = (futuresol *)(futuresols+fsol_size*r);
+        solution *new_sol = safe_malloc(sizeof(solution));
+        *new_sol = *fsol->origin;
+        lint delta = solution_add(prob,new_sol,fsol->newf);
+        if(delta<=0){
+            free(new_sol);
+            continue;
+        }
+        out_sols[*out_n_sols] = new_sol;
+        *out_n_sols += 1;
+    }
+    free(futuresols);
     return out_sols;
 }
 

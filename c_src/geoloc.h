@@ -3,16 +3,15 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 
 #define MAX_FACILITIES 512
 #define MAX_CLIENTS 512
 
-#define HASH_SLOTS 999983
-// ^ 2^19-7
-
 typedef long long int lint;
 typedef unsigned int uint;
+typedef unsigned short ushort;
 
 typedef struct{
     int n_facilities, n_clients;
@@ -42,10 +41,6 @@ struct _solution {
     // ^ Which facility is working each client.
     lint value;
     // ^ Value of this solution on the objective function.
-    uint hash;
-    // ^ Current hash for the solution, and if it is valid or it should be recomputed.
-    struct _solution* next;
-    // ^ Pointer to be used on a linked list, a solution can only stay in one linked list at the same time.
 };
 
 typedef struct _solution solution;
