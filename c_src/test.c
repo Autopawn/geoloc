@@ -59,13 +59,13 @@ int main(int argc, char **argv){
     if(seed<0) seed*=-1;
     printf("seed: %d\n", seed);
     // Algorithm parameters:
-    int pool_size = 4;
-    int vision_range = 100;
+    int pool_size = 400;
+    int vision_range = 200;
     // Problem parameters:
-    int n_places = 5;
+    int n_places = 100;
     int board_size = 1000;
     // Problem constants:
-    int facility_cost = 200;
+    int facility_cost = 600;
     int variant_gain = 300;
     int transport_cost = 1;
     // Output:
@@ -94,10 +94,10 @@ int main(int argc, char **argv){
         if(i>=n_sols) break;
         print_solution(sols[i]);
     }
-    // Save best solution on asy file:
-    save_solution_asy("best_sol.asy",
+    // Save best solution on svg file:
+    save_solution_svg("best_sol.svg",
         pos_x,pos_y,n_places,pos_x,pos_y,n_places,
-        sols[0],100.0/board_size);
+        sols[0],500.0/board_size);
     // Free memory
     for(int i=0;i<n_sols;i++){
         free(sols[i]);

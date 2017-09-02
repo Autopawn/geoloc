@@ -1,5 +1,6 @@
 # Output
 best*.asy
+best*.svg
 best*.png
 
 # valgrind

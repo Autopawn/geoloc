@@ -159,7 +159,7 @@ int futuresol_cmp(const void *a, const void *b){
 // DISSIMILITUDE PAIRS HEAP
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-// NOTE: Is possible to change lint->float and int->ushort to use half of the memory saving pair data.
+// NOTE: Is possible to replace lint=>float and int=>ushort to use half of the memory saving pair data.
 typedef struct{
     lint dissim;
     int indx_a, indx_b;
@@ -205,7 +205,6 @@ void heap_add(dissimpair *heap, int *size, dissimpair val){
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 // | Compute the clients indexes sorted by distance for each facility.
-// nearest should be a [MAX_FACILITIES]x[MAX_CLIENTS] matrix.
 void problem_compute_nearest(problem* prob){
     // For each facility
     for(int f=0;f<prob->n_facilities;f++){
@@ -288,6 +287,8 @@ void reduce_solutions(const problem *prob,
         solution **sols, int *n_sols, int target_n, int vision_range){
     // Sort solution pointers from larger to smaller value of the solution.
     qsort(sols,*n_sols,sizeof(solution*),solution_value_cmp_inv);
+    // Return if there is no need of reduction.
+    if(*n_sols<=target_n) return;
     // Double linked structure to know solutions that haven't yet been discarted:
     int *discarted = safe_malloc((*n_sols)*sizeof(int));
     int *nexts = safe_malloc((*n_sols)*sizeof(int));

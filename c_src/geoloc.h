@@ -77,30 +77,25 @@ static inline void print_solutions(solution **sols, int n_sols){
     printf("}\n");
 }
 
-static inline void save_solution_asy(const char *fname,
+static inline void save_solution_svg(const char *fname,
         const lint *cli_xs, const lint *cli_ys, int n_clis,
         const lint *fac_xs, const lint *fac_ys, int n_facs,
         const solution *sol, float scale){
-    printf("Exporting solution to asy file: %s\n",fname);
+    printf("Exporting solution to svg file: %s\n",fname);
     // Open file
     FILE *f = fopen(fname, "w");
     if(f==NULL){
-        printf("Error opening file to save asy!\n");
+        printf("Error opening file to save svg!\n");
         exit(1);
     }
-    // Print function to make arrows:
-    fprintf(f,"unitsize(5);\n");
-    fprintf(f,"path unibox = box((-1,-1),(1,1));\n");
-    fprintf(f,"path larrow(pair ini, pair end, bool pre=false){\n");
-    fprintf(f,"\treal signx = end.x-ini.x;\n");
-    fprintf(f,"\tif(signx<-1) signx=-1;\n");
-    fprintf(f,"\tif(signx>1) signx=1;\n");
-    fprintf(f,"\treal signy = end.y-ini.y;\n");
-    fprintf(f,"\tif(signy<-1) signy=-1;\n");
-    fprintf(f,"\tif(signy>1) signy=1;\n");
-    fprintf(f,"\treturn (ini.x+(pre?signx:0),ini.y+(pre?signy:0))\n");
-    fprintf(f,"\t\t--(end.x-signx,end.y-signy);\n");
-    fprintf(f,"}\n");
+    // Start SVG file
+    fprintf(f,"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+    fprintf(f,"<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">\n");
+    // Print clients
+    for(int i=0;i<n_clis;i++){
+        fprintf(f,"<circle cx=\"%6f\" cy=\"%6f\" r=\"4\" fill=\"red\"/>\n",
+        cli_xs[i]*scale,cli_ys[i]*scale);
+    }
     // Print facilities:
     for(int i=0;i<n_facs;i++){
         int present = 0;
@@ -111,30 +106,25 @@ static inline void save_solution_asy(const char *fname,
             }
         }
         if(present){
-            // Print arrows:
-            for(int k=0;k<n_clis;k++){
-                if(sol->assignments[k]==i){
-                    if(fac_xs[i]!=cli_xs[k] || fac_ys[i]!=cli_ys[k]){
-                        fprintf(f,"draw(larrow((%6f,%6f),(%6f,%6f)),",
-                        fac_xs[i]*scale,fac_ys[i]*scale,
-                        cli_xs[k]*scale,cli_ys[k]*scale);
-                        fprintf(f,"arrow=Arrow(TeXHead),black);\n");
-                    }
-                }
-            }
             // Print facility:
-            fprintf(f,"filldraw(shift(%6f,%6f)*unibox,blue);\n",
-                fac_xs[i]*scale,fac_ys[i]*scale);
+            fprintf(f,"<rect x=\"%6f\" y=\"%6f\" width=\"9\" height=\"9\" fill=\"blue\" stroke-width=\"2\" stroke=\"black\" fill-opacity=\"0.75\" />\n",
+            fac_xs[i]*scale-4.5,fac_ys[i]*scale-4.5);
         }else{
-            fprintf(f,"draw(shift(%6f,%6f)*unibox);\n",
-                fac_xs[i]*scale,fac_ys[i]*scale);
+            // Print facility:
+            fprintf(f,"<rect x=\"%6f\" y=\"%6f\" width=\"9\" height=\"9\" stroke-width=\"2\" stroke=\"black\" fill-opacity=\"0\" />\n",fac_xs[i]*scale-4.5,fac_ys[i]*scale-4.5);
         }
     }
-    // Print clients
-    for(int i=0;i<n_clis;i++){
-        fprintf(f,"filldraw(shift(%6f,%6f)*unitcircle,red);\n",
-            cli_xs[i]*scale,cli_ys[i]*scale);
+    // Print arrows:
+    for(int k=0;k<n_clis;k++){
+        int i = sol->assignments[k];
+        if(fac_xs[i]!=cli_xs[k] || fac_ys[i]!=cli_ys[k]){
+            fprintf(f,"<line x1=\"%6f\" y1=\"%6f\" x2=\"%6f\" y2=\"%6f\" stroke=\"blue\" stroke-width=\"2\"/>\n",
+            fac_xs[i]*scale,fac_ys[i]*scale,
+            cli_xs[k]*scale,cli_ys[k]*scale);
+        }
     }
+    // End SVG file
+    fprintf(f,"</svg>\n");
     fclose(f);
 }
 #endif
