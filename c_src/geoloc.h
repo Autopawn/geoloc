@@ -48,6 +48,8 @@ typedef struct _solution solution;
 solution **new_find_best_solutions(problem* prob,
         int pool_size, int vision_range, int *final_n);
 
+problem *new_problem_load(const char *file);
+
 static inline void print_solution(const solution *sol){
     printf("SOLUTION:\n");
     printf("  Value: %lld\n",sol->value);

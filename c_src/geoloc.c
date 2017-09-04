@@ -420,7 +420,7 @@ solution **new_find_best_solutions(problem* prob,
         print_solutions(pools[i],pools_size[i]);
         #endif
         if(pools_size[i]==0){
-            printf("No more valuable solution of size %d!\n",i);
+            printf("No more valuable solutions of size %d!\n",i);
             break;
         }
         printf("Reducing %d solutions of size %d...\n",pools_size[i],i);
