@@ -2,7 +2,6 @@
 
 problem *new_problem_load(const char *file){
     FILE *fp;
-
     printf("Reading file \"%s\"...\n",file);
     fp = fopen(file,"r");
     if(fp==NULL){
@@ -95,4 +94,24 @@ problem *new_problem_load(const char *file){
     fclose(fp);
     printf("Done reading.\n");
     return prob;
+}
+
+void save_solutions(const char *file, solution **sols, int n_sols,
+        const char *input_file, int pool_size, int vision_range){
+    FILE *fp;
+    printf("Opening file \"%s\"...\n",file);
+    fp = fopen(file,"w");
+    if(fp==NULL){
+        printf("ERROR: couldn't open file \"%s\"!\n",file);
+        exit(1);
+    }
+    // Print some aditional info:
+    fprintf(fp,"# Input file: %s\n",input_file);
+    fprintf(fp,"# Pool size: %d\n",pool_size);
+    fprintf(fp,"# Vision range: %d\n",vision_range);
+    // Print the solutions:
+    for(int i=0;i<n_sols;i++){
+        print_solution(fp,sols[i]);
+    }
+    fclose(fp);
 }

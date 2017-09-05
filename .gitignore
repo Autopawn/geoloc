@@ -2,6 +2,7 @@
 best*.asy
 best*.svg
 best*.png
+results
 
 # valgrind
 vgcore.*

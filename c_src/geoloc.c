@@ -417,7 +417,7 @@ solution **new_find_best_solutions(problem* prob,
             pools_size[i-1], &pools_size[i]);
         #ifdef VERBOSE
         printf("Base %d:\n",i);
-        print_solutions(pools[i],pools_size[i]);
+        print_solsets(pools[i],pools_size[i]);
         #endif
         if(pools_size[i]==0){
             printf("No more valuable solutions of size %d!\n",i);
@@ -431,7 +431,7 @@ solution **new_find_best_solutions(problem* prob,
         //
         #ifdef VERBOSE
         printf("Pool %d:\n",i);
-        print_solutions(pools[i],pools_size[i]);
+        print_solsets(pools[i],pools_size[i]);
         #endif
         total_pools_size += pools_size[i];
     }
