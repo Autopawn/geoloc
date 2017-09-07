@@ -1,3 +1,10 @@
+Posible nombre para el paper:
+
+A dissimilitude-based incremental solution exploration algorithm for a maximum profit euclidean facility location problem.
+
+A dissimilitude-based solution construction algorithm for a maxium profit facility location problem.
+
+
 El uncapacitated facility location problem es exáctamente el que se trabaja, pero obliga a suplir toda la demanda...? ¡Si!
 ¿Se daba una cantidad fija de facilities en él?
 

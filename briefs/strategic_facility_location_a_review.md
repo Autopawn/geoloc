@@ -1,5 +1,3 @@
-### Strategic facility location: A review
-
 Nombra modelos dinámicos y estocásticos para tomar en consideración el futuro incierto en la posible ubicación de instalaciones.
 
 Señala que los modelos mátematicos son simples, y aun los más simples tienen problemas por ser NP-Duros.
