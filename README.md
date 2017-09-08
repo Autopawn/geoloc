@@ -31,6 +31,28 @@ To create an `svg` image of the best solution:
 
 `test_solution.svg` is the resulting image.
 
+### Problem file format
+
+```
+<facility_cost>
+<variant_gain_per_weight>
+<transport_cost_per_weight_per_distance>
+<number_of_facilities(n)>
+<number_of_clients(m)>
+
+<distance_f1_f1> <distance_f1_f2> ... <distance_f1_fn>
+<distance_f2_f1> <distance_f2_f2> ... <distance_f2_fn>
+    :                :                    :
+<distance_fn_f1> <distance_fn_f2> ... <distance_fn_fn>
+
+<weight_c1> <weight_c2> ... <weight_cm>
+
+<distance_f1_c1> <distance_f1_c2> ... <distance_f1_cm>
+<distance_f2_c1> <distance_f2_c2> ... <distance_f2_cm>
+    :                :                    :
+<distance_fn_c1> <distance_fn_c2> ... <distance_fn_cm>
+```
+
 ## Haskell code
 
 The haskell code, on `hs_src` is a previous version of the algorithm, not as fast than the C one but highly more generalized. The generalized functions are placed on `Exploration.hs`, the particular case of facility location on two dimentional euclidian space is defined on `Geoloc.hs`.

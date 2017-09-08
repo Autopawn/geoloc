@@ -64,6 +64,7 @@ problem *new_problem_load(const char *file){
     }
 
     // Read clients weights:
+    int minw=-1,maxw=-1;
     printf("Reading client weights...\n");
     for(int i=0;i<prob->n_clients;i++){
         int result = fscanf(fp,"%d",&prob->weights[i]);
@@ -74,7 +75,11 @@ problem *new_problem_load(const char *file){
             printf("ERROR: Weight expected!\n");
             exit(1);
         }
+        if(i==0 || prob->weights[i]<minw) minw = prob->weights[i];
+        if(i==0 || prob->weights[i]>maxw) maxw = prob->weights[i];
     }
+    printf("Min weight: %d\n",minw);
+    printf("Max weight: %d\n",maxw);
 
     // Read the facility-client distance matrix:
     printf("Reading facility-client distance matrix...\n");

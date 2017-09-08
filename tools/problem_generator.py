@@ -50,7 +50,8 @@ def seesu_problem(fname,n=100,board_size=10000,
         fi.write("\n")
     # client weights
     for i in range(n_clients):
-        fi.write("%d\n"%1)
+        fi.write("%d "%1)
+    fi.write("\n")
     # facility-client distance matrix
     for i in range(n_facilities):
         for j in range(n_clients):
