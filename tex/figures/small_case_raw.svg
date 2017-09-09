@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="500" height="500">
+<rect x="0" y="0" width="500" height="500" stroke-width="2" stroke="black" fill-opacity="0" />
+<circle cx="343.50" cy="177.50" r="4" fill="red"/>
+<circle cx="144.00" cy="134.00" r="4" fill="red"/>
+<circle cx="84.50" cy="16.00" r="4" fill="red"/>
+<circle cx="234.00" cy="455.50" r="4" fill="red"/>
+<circle cx="498.00" cy="140.00" r="4" fill="red"/>
+<circle cx="28.00" cy="145.50" r="4" fill="red"/>
+<circle cx="177.00" cy="174.00" r="4" fill="red"/>
+<circle cx="95.50" cy="6.50" r="4" fill="red"/>
+<circle cx="133.50" cy="88.00" r="4" fill="red"/>
+<circle cx="71.50" cy="73.50" r="4" fill="red"/>
+<circle cx="449.00" cy="374.00" r="4" fill="red"/>
+<circle cx="335.50" cy="445.00" r="4" fill="red"/>
+<circle cx="22.00" cy="75.00" r="4" fill="red"/>
+<circle cx="469.50" cy="57.50" r="4" fill="red"/>
+<circle cx="5.50" cy="208.50" r="4" fill="red"/>
+<rect x="278.00" y="16.00" width="9" height="9" stroke-width="2" stroke="black" fill-opacity="0"/>
+<rect x="126.00" y="257.50" width="9" height="9" stroke-width="2" stroke="black" fill-opacity="0"/>
+<rect x="302.50" y="95.50" width="9" height="9" stroke-width="2" stroke="black" fill-opacity="0"/>
+<rect x="316.00" y="374.00" width="9" height="9" stroke-width="2" stroke="black" fill-opacity="0"/>
+<rect x="123.50" y="174.00" width="9" height="9" stroke-width="2" stroke="black" fill-opacity="0"/>
+<rect x="305.00" y="464.50" width="9" height="9" stroke-width="2" stroke="black" fill-opacity="0"/>
+<rect x="205.00" y="492.50" width="9" height="9" stroke-width="2" stroke="black" fill-opacity="0"/>
+<rect x="70.50" y="122.50" width="9" height="9" stroke-width="2" stroke="black" fill-opacity="0"/>
+<rect x="26.50" y="471.50" width="9" height="9" stroke-width="2" stroke="black" fill-opacity="0"/>
+<rect x="18.50" y="270.00" width="9" height="9" stroke-width="2" stroke="black" fill-opacity="0"/>
+</svg>

@@ -20,7 +20,7 @@ To run the program over the test case, with a pool of `1000` and a vision range 
 
     ```bash
     $ mkdir -p results
-    $ ./geoloc.exe 1000 100 10 cases/test_case.txt  results/test_result.txt
+    $ ./geoloc.exe 1000 100 10 cases/test_case.txt results/test_result.txt
     ```
 
 To create an `svg` image of the best solution:
