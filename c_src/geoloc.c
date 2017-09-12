@@ -254,12 +254,22 @@ solution **new_expand_solutions(const problem *prob,
     futuresol *last_fsol = NULL;
     for(int r=0;r<n_futuresols;r++){
         futuresol *fsol = (futuresol *)(futuresols+fsol_size*r);
-        if(last_fsol==NULL || futuresol_cmp(last_fsol,fsol)!=0){
+        // Compare fsol with the last_fsol:
+        int ftsol_cmp = 0;
+        if(last_fsol!=NULL) ftsol_cmp = futuresol_cmp(last_fsol,fsol);
+        // Check if fsol creates a brave new solution.
+        if(last_fsol==NULL || ftsol_cmp!=0){
             futuresol *next_pos = (futuresol *)
                 (futuresols+fsol_size*new_n_futuresols);
             memcpy(next_pos,fsol,fsol_size);
             last_fsol = next_pos;
             new_n_futuresols += 1;
+        }
+        /* Check if fsol doesn't create a new solution but creates it from a better one, in that case fsol replaces last_fsol. Because the new
+        solution should be better that the better one that generates it */
+        if(last_fsol!=NULL && ftsol_cmp==0){
+            int is_better = fsol->origin->value>last_fsol->origin->value;
+            if(is_better) memcpy(last_fsol,fsol,fsol_size);
         }
     }
     n_futuresols = new_n_futuresols;
