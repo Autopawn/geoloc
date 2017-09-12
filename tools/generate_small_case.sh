@@ -1,4 +1,5 @@
 # TODO: Make this utility save files elsewhere...
+# NOTE: If used, remember to modify the image descriptions in the documents.
 
 python3 tools/problem_generator.py deesu 10 15 1000 1000 600 1 cases/small_case.txt cases/small_case_pos.txt
 

@@ -19,3 +19,9 @@ document:
 	cd tex/doc; pdflatex 00main.tex
 	cd tex/doc; pdflatex 00main.tex
 	mv tex/doc/00main.pdf geoloc.pdf
+paper:
+	cd tex/paper; pdflatex main.tex
+	cd tex/paper; bibtex main
+	cd tex/paper; pdflatex main.tex
+	cd tex/paper; pdflatex main.tex
+	mv tex/paper/main.pdf paper.pdf

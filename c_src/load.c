@@ -49,6 +49,7 @@ problem *new_problem_load(const char *file){
     assert(prob->n_clients<=MAX_CLIENTS);
 
     // Read the facility distance matrix:
+    int warning_issued = 0;
     printf("Reading facility distance matrix...\n");
     for(int i=0;i<prob->n_facilities;i++){
         for(int j=0;j<prob->n_facilities;j++){
@@ -59,6 +60,10 @@ problem *new_problem_load(const char *file){
             }else if(result!=1){
                 printf("ERROR: Distance expected!\n");
                 exit(1);
+            }
+            if(i==j && prob->fdistances[i][j]!=0 && warning_issued==0){
+                printf("WARNING: Non-zero distance on diagonal.\n");
+                warning_issued = 1;
             }
         }
     }

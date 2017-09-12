@@ -1,10 +1,3 @@
-Posible nombre para el paper:
-
-A dissimilitude-based incremental solution exploration algorithm for a maximum profit euclidean facility location problem.
-
-A dissimilitude-based solution construction algorithm for a maxium profit facility location problem.
-
-
 El uncapacitated facility location problem es exáctamente el que se trabaja, pero obliga a suplir toda la demanda...? ¡Si!
 ¿Se daba una cantidad fija de facilities en él?
 
@@ -33,3 +26,5 @@ TODO: llamar allocation costs al costo de colocar una instalación.
 Se puede considerar la interpretación del radio crítico y la eficiencia respecto a él.
 
 Realizar análisis del rango de visión, el decaimiento constante del par de menor dismimilitud es un signo de haberlo elegido correctamente (¿Es un signo o sirve como demostración?), también se puede calcular cual hubiese sido el rango de visión óptimo si se ejecuta con rango de visión infinito y se ve la mayor distancia entre las soluciones de los pares menores.
+
+**IMPORTANTE:** El que la ganancia obtenida dependa de la distancia se llama _gradual covering_, y este modelo es particularmente bueno para eso porque LA SIMILITUD GEOGRAFICA IMPLICA SIMILITUD ECONÓMICA Y VICE-VERSA Y NO SERÍA ASÍ CON OTROS MODELOS!!!!

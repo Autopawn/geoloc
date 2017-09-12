@@ -4,7 +4,7 @@ En el modelo original (Balinski) se busca servir una serie de clientes a un cost
 
 **IMPORTANTE:** Servir a todos los clientes se llama `serve all comers`.
 
-Se escriben dos modelos, el primero es el plant location problem con objetivos de costo total mínimo y el maximum return on investment.kj
+Se escriben dos modelos, el primero es el plant location problem con objetivos de costo total mínimo y el maximum return on investment.
 
 Brimberg y ReVelle abordan el problema de los clientes que no conviene alcanzar, otra vez el buscado paper: _A multi-facility location model with partial satisfaction of demand_.
 
@@ -16,4 +16,4 @@ TODO: Comprobar cómo se comporta la LP con branch-and-bound con problemas como 
 
 NOTE: Es importante nombrar la cantidad de datos que se están manejando, por lo visto en este paper se consideran problemas bastante más pequeños.
 
-"However, the removal of the 'serve all comers' equierement is expectos to improve the integer friendliness of the problem structure. Otra vez el buscado paper: _A multi-facility location model with partial satisfaction of demand_.
+"However, the removal of the 'serve all comers' equierement is expect to improve the integer friendliness of the problem structure. Otra vez el buscado paper: _A multi-facility location model with partial satisfaction of demand_.
