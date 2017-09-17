@@ -1,17 +1,21 @@
 \documentclass{article}
+\usepackage[letterpaper, margin=2cm]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage{amssymb}
 \usepackage{amsmath}
+\usepackage{bm}
 
 \usepackage{subfig}
-
-\usepackage{soul}
-\newcommand{\hlc}[2][yellow]{{\sethlcolor{#1}\hl{#2}}}
 
 \setlength\parindent{0pt}
 
 \usepackage{graphicx}
 \graphicspath{{../figures/}}
+
+\usepackage{soul}
+
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
 
 \title{A dissimilitude-based constructive algorithm for a maximum profit facility location problem on the metric-space}
 
@@ -36,98 +40,70 @@ En el área de la \emph{facility location} entre los problemas más comunes se t
 
 \cite{mukundan1991joint} muestra un modelo de maximización de utilidades, considerando costos de transporte y niveles de inversión para cada instalación (que permiten abarcar diferentes distancias), entre las variantes se propone  eliminar la restricción \emph{serve all comers}. \cite{brimberg2000maximum} muestra modelos bi-critero entre las ganancias o costos operativos y la inversión necesaria, entre otras cosas, para la compra y puesta en marcha de las instalaciones, al igual que el anterior realiza pruebas con solvers de programación lineal. Ambos trabajos concluyen que la relajación LP de los modelos sobre los que se hicieron pruebas son \emph{integer-friendly} pero no eliminan la restricción \emph{serve all comers} en estas pruebas, aun así  \cite{brimberg2000maximum} concluye que el aumentar el tamaño del problema deteriora la \emph{integer-friendliness}.
 
-\section{Modelo}
+\input{modelo}
 
-% TODO: Agregar sobre la clasificación del problema (lo hago en la introducción ¿Borrar?)
+\section{Problema ilustrativo}
 
-% TODO: Señalar que aunque se habla de clientes pueden ser suministros, ¿Señalar aplicación en ubicación de plantas de biogas de papá?
+En la Figura \ref{fig:ilustrative_problem} se muestra un problema pequeño para ilustrar el funcionamiento del algoritmo, originado con $|Z|=7$, $|C|=10$ asignando posiciones aleatorias en $[0,1000] \times [0,1000]$, con parámetros $\gamma = 500$, $\alpha = 500$ y $\beta = 1$. La ejecución mostrada se realizó con \texttt{POOL\_SIZE}$=5$. Para este problema todos los pesos $w_i$ son $1$.
 
-Se tiene un conjunto de posibles ubicaciones para instalaciones $Z = \{z_1,z_2,...,z_{|Z|}\}$ y un conjunto ubicaciones de clientes $C = \{c_1,c_2,...,c_{|C|}\}$, cada cliente $c_i$ tiene asociado un peso o cantidad de demanda $w_i$.
-
-Estas ubicaciones pueden ser vectores en $\mathbb{R}^N$, posiciones en una red o cualquier espacio métrico $\mathbb{E}$ en que se encuentre definida una métrica de distancia $d : \mathbb{E}^2 \rightarrow \mathbb{R}$ entre cada par de estas.
-
-Se tiene el siguiente modelo de programación lineal:
-
-\textbf{Índices:}
-\begin{align*}
-    i &= \text{índices de posibles clientes} \\
-    j &= \text{índices de posibles ubicaciones de instalaciones} \\
-    \text{\textbf{Inputs:}} \\
-    w_i &= \text{Demanda del cliente $i$} \\
-    \gamma &= \text{Costo fijo de colocar cada instalación} \\
-    \alpha &= \text{Ganancia obtenida por cada unidad de demanda alcanzada} \\
-    \beta &= \text{Costo de transportar una unidad de distancia una unidad de demanda} \\
-    d_{ij} &= \text{Distancia entre cliente $i$ y la instalación $j$} = d(c_i,z_j)
-\end{align*}
-\textbf{Variables de decisión:}
-\begin{align*}
-    Y_{ij} &= \begin{cases}
-        1 & \text{Si la demanda de $c_i$ es suplida por la instalación en $z_j$} \\
-        0 & \text{Si no}
-    \end{cases} \\
-    X_{j} &= \begin{cases}
-        1 & \text{Si se decide poner una instalación en $z_j$} \\
-        0 & \text{Si no}
-    \end{cases}
-\end{align*}
-\textbf{Maximizar:}
-\begin{equation}
-    - \sum_{j=1}^{|Z|} \gamma X_{j} + \sum_{i=1}^{|C|} \sum_{j=1}^{|Z|} \alpha w_i Y_{ij} - \sum_{i=1}^{|C|} \sum_{j=1}^{|Z|} \beta w_i d_{ij} Y_{ij}
-\end{equation}
-\textbf{Sujeto a:}
-\begin{align*}
-    Y_{ij} &\leq X_{j} \qquad \forall i \in \{1..|C|\} \quad \forall j \in \{1..|Z|\} \\
-    \sum_{j=1}^{|Z|} Y_{ij} &\leq 1 \qquad \forall i \in \{1..|C|\} \\
-    Y_{ij} &= 0,1 \qquad \forall i \in \{1..|C|\} \quad \forall j \in \{1..|Z|\} \\
-    X_{j} &= 0,1 \qquad \forall j \in \{1..|Z|\}
-\end{align*}
-
-Este modelo corresponde a un caso particular de una de las variaciones mencionadas en \cite{mukundan1991joint}, en que los parámetros $d_{ij}$ cumplen con las propiedades de un espacio métrico, el costo de ubicar una instalación y la ganancia por alcanzar un cliente es independiente de su posición y el costo de transporte sólo depende de su nivel de demanda y su distancia.
-
-\begin{figure}%
+\begin{figure}
     \centering
-    \subfloat[Ejemplo de un problema]{{\includegraphics[width=5cm,height=5cm]{small_case_raw.png}}}
+    \subfloat[Problema ilustrativo.]{{\includegraphics[width=5cm,height=5cm]{tiny_case_raw.png}}}
     \qquad \qquad \qquad
-    \subfloat[Posible solución]{{\includegraphics[width=5cm,height=5cm]{small_case_sol.png}}}
-    \caption{A la izquierda, ejemplo de un problema, puntos rojos son ubicaciones de clientes, cuadrados son posibles ubicaciones de instalaciones.\\ A la derecha una posible solución, cuadrados azules representan subconjunto elegido de ubicaciones de instalaciones, clientes son trabajados por la instalación más cercana o ninguna si todas están muy lejos (tal es el caso del cliente en la esquina superior derecha).}
-    \label{fig:problem}
+    \subfloat[Mejor solución encontrada con \texttt{POOL\_SIZE}$=5$.]{{\includegraphics[width=5cm,height=5cm]{tiny_case_sol.png}}}
+    \label{fig:ilustrative_problem}
 \end{figure}
 
-Notando que la función objetivo puede expresarse de la siguiente manera:
 \begin{align*}
-    -\sum_{j=1}^{|Z|} \gamma X_{j} + \sum_{i=1}^{|C|} w_i \sum_{j=1}^{|Z|} Y_{ij} (\alpha - \beta d_{ij})
+Z &= \{z_1,z_2,z_3,z_4,z_5,z_6,z_7\} \\
+G &= \{z_1,z_2,z_3,z_4,z_5,z_7\} \\
+B_1 &= \{\{z_1\},\{z_2\},\{z_3\},\{z_4\},\{z_5\},\{z_7\}\} \\
+P_1 &= \{\{z_1\},\{z_2\},\{z_4\},\{z_5\},\{z_7\}\} \\
+B_2 &= \{\{z_1,z_2\},\{z_1,z_3\},\{z_1,z_4\},\{z_1,z_5\},\{z_1,z_7\},\{z_3,z_7\},\{z_4,z_7\}\} \\
+P_2 &= \{\{z_1,z_3\},\{z_1,z_4\},\{z_1,z_7\},\{z_3,z_7\},\{z_4,z_7\}\} \\
+B_3 &= \{\{z_1,z_3,z_7\},\{z_1,z_4,z_7\}\} \\
+P_3 &= \{\{z_1,z_3,z_7\},\{z_1,z_4,z_7\}\} \\
+B_4 &= \{\} \\
+\text{Mejor} &= \argmax_{S \in \cup_{i} (P_i)}\Phi(S) = \{z_1,z_4,z_7\}
 \end{align*}
-Se puede identificar un radio crítico $RC = \frac{\alpha}{\beta d_{ij}}$ pasado el cual no es conveniente suplir la demanda de un cliente. De la misma manera, puesto que la única variable controlable es $d_{ij}$, convendrá que la demanda de cliente sea suplida por la instalación colocada más cercana, a menos que esta se encuentre a una distancia mayor que el radio crítico.
 
-Esta observación permite expresar una solución al problema ya no como el conjunto de varibles de decisión $X_{j}$ y $Y_{ij}$, sino como un subconjunto $S$ de $Z$, buscando maximiziar el valor de la siguiente función objetivo $\Phi : \mathcal{P}(Z) \rightarrow \mathbb{R}$:
+En primer lugar se calcula $G$, $z_6$ es excluído ya que $\{z_6\}$ no tiene valor positivo en la función objetivo y $G$ es también $B_1$.
+En $P_1$ el proceso de reducción elimina $\{z_3\}$, producto de su similitud con $\{z_2\}$, logrando así obtener una \emph{pool} de tamaño $5$.
+$B_2$ se construye agregando instalaciones de $G$ a las soluciones de $P_1$, nótese que, por ejemplo, la solución $\{z_2,z_7\}$ pudo haber sido generada en este proceso, tanto expandiendo $\{z_2\}$ con $z_7$ como expandiendo $\{z_7\}$ con $z_2$, pero no se agrega a la \emph{base} pues en la función objetivo no logró superar a alguna de estas soluciones que la pudo haber generado.
+El proceso de reducción vuelve a eliminar soluciones parecidas hasta lograr $P_2$, al generar $B_3$ sólo resultan 2 soluciones pués el costo de agregar instalaciones sobrepasa la ganancia en la mayoría de estas. Para formar $P_3$ el proceso de reducció no hace nada pues hay menos de \texttt{POOL\_SIZE} soluciones, finalmente ninguna de las soluciones en $P_3$ puede expandirse de ninguna forma que genere una solución de tamaño 4 más rentable y la ejecución termina, entregando la mejor solución de entre todas las \emph{pools}.
+
+\input{reduccion}
+
+\section{Métricas de disimilitud}
+\label{metricas_disimilitud}
+
+Como se señaló previamente, para comparar soluciones se requiere una medida de disimilitud, siendo lógico que esté asociada a la métrica de distancia $d(a,b)$ entre dos ubicaciones $a,b$. Para que una medida $D(A,B)$ entre dos soluciones, $A = \{a_1,a_2,...,a_n\}$ y $B = \{b_1,b_2,...,b_m\}$, sea una métrica debe cumplir con:
+
+\begin{enumerate}
+\item $D(A,B) = 0 \Leftrightarrow A=B$
+\item $D(A,B) = D(B,A)$
+\item $D(A,C) \leq D(A,B) + D(B,C)$
+\end{enumerate}
+
+Para los experimentos se utilizará el \emph{mean geometric error} por su facilidad de cálculo. Esta métrica corresponde a la distancia promedio que tienen las ubicaciones de ambos conjuntos a la ubicación más cercana en el conjunto opuesto.
 
 \begin{equation}
-\Phi(S) = -\gamma \cdot |S| + \sum_{i=1}^{|C|} \max \left\{ 0 , \max_{z \in S} ( \alpha \cdot w_i - \beta \cdot w_i \cdot d(c_i,z)) \right\}
+D(A,B) = \frac{1}{|A|+|B|}\left(\sum_{a \in A}\inf_{b \in B}d(a,b) +
+\sum_{b \in B}\inf_{a \in A}d(b,a)\right)
 \end{equation}
 
-Una solución $S$ se traduce a una solución para el modelo de programación lineal, asumiendo por simplicidad y sin pérdida de generalidad que las distancias $d_{ij}$ son diferentes, de la siguiente manera:
+También se sugiere el \emph{minimum weight matching}. Esta métrica corresponde a la suma de las distancias entre los pares del matching completo $m^\star$ entre $A$ y $B$ que minimiza esta suma de distancias. $m^\star$ es, por lo tanto, la solución a un problema de asignación.
 
-\begin{align*}
-    X_{j} &= \begin{cases}
-        1 &\quad z_j \in S \\
-        0 &\quad z_j \notin S
-    \end{cases}\\
-    Y_{ij} &= \begin{cases}
-        1 &\quad (d_{ij} \leq RC) \wedge (d_{ij} \leq d_{ik} \quad \forall k : z_k \in S)
-        \\
-        0 &\quad e.o.c.
-    \end{cases}
-\end{align*}
+\begin{equation}
+D(A,B) = \inf_{m \in M}\left( \sum_{(a,b) \in m} d(a,b)\right)
+\end{equation}
+Donde $M$ es el conjunto de todos los posibles matchings completos entre $A$ y $B$.
 
-Siendo las soluciones generadas de esta manera siempre igual o mejores que sus contrapartes con distintos valores $Y_{ij}$, se reduce el espacio de búsqueda, a uno con soluciones descritas completamente por un subconjunto de instalaciones elegido.
+La razón de la elección de estas métricas es que consideran todos los elementos, haciendo que cualquier diferencia entre combinaciones de posibles ubicaciones sea considerada en el algoritmo. Si se utilizada, por ejemplo, \emph{simple linkage} o \emph{complete linkage} que sólo dependen del par de ubicaciones más cercano o más alejado respectivamente, sería común que dos soluciones, pudiendo ser bastante diferentes, tengan la misma disimilitud a una tercera, produciendo empates que se rompen arbitrariamente en el proceso de reducción.
 
-\section{Algoritmo}
+\section{Experimentos y resultados}
 
-
-
-\section{Reducción}
-
-\section{Disimilitud}
+\section{Conclusiones}
 
 \bibliographystyle{amsplain}
 \bibliography{main}{}
