@@ -191,7 +191,7 @@ void heap_add(dissimpair *heap, int *size, dissimpair val){
     // Heapify up:
     int i = *size-1;
     int p = (i-1)/2;
-    while(p>=0 && heap[i].dissim<heap[p].dissim){
+    while(i>0 && heap[i].dissim<heap[p].dissim){
         dissimpair aux = heap[i];
         heap[i] = heap[p];
         heap[p] = aux;
