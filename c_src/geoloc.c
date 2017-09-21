@@ -411,8 +411,10 @@ solution **new_find_best_solutions(problem* prob,
     printf("Computing 'nearest' table optimization...\n");
     problem_compute_nearest(prob);
     // Place to store all the pools:
-    int pools_size[MAX_FACILITIES+1] = {0};
-    solution **pools[MAX_FACILITIES+1] = {NULL};
+    int pools_size[MAX_FACILITIES+1];
+    for(int i=0;i<MAX_FACILITIES+1;i++) pools_size[i] = 0;
+    solution **pools[MAX_FACILITIES+1];
+    for(int i=0;i<MAX_FACILITIES+1;i++) pools[i] = NULL;
     // Create the first pool:
     solution empt = empty_solution();
     solution *pool0[1];
