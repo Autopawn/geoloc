@@ -1,6 +1,6 @@
 # Geoloc
 
-## C code
+## C code and Python tools
 
 The main version of the algorithm is done in the C language. To compile and create `geoloc.exe`:
 
@@ -30,6 +30,12 @@ To create an `svg` image of the best solution:
     ```
 
 `test_solution.svg` is the resulting image.
+
+To create a linear programming problem for `lp_solve` from the test case:
+
+    ```bash
+    python3 tools/lp_problem_stranslator.py cases/test_case.txt cases/test_case.lp
+    ```
 
 ### Problem file format
 
