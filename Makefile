@@ -13,15 +13,3 @@ geoloc_verbose:
 geoloc_test: clean
 	cd c_src; gcc -O -g -Wall -lm geoloc.c load.c main.c -o ../geoloc.exe
 	valgrind --tool=memcheck --leak-check=yes ./geoloc.exe 1000 100 10 cases/case_1.txt results/geoloc_test.txt
-document:
-	cd tex/doc; pdflatex 00main.tex
-	cd tex/doc; bibtex 00main
-	cd tex/doc; pdflatex 00main.tex
-	cd tex/doc; pdflatex 00main.tex
-	mv tex/doc/00main.pdf geoloc.pdf
-paper:
-	cd tex/paper; pdflatex main.tex
-	cd tex/paper; bibtex main
-	cd tex/paper; pdflatex main.tex
-	cd tex/paper; pdflatex main.tex
-	mv tex/paper/main.pdf paper.pdf
