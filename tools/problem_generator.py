@@ -73,6 +73,7 @@ def problem(fname,n=100,m=100,board_size=10000,
     fi.write("\n")
     for i in range(n_clients):
         fi.write("%d "%1)
+    fi.write("\n")
     # facility-client distance matrix
     fi.write("\n")
     for i in range(n_facilities):
