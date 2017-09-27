@@ -30,9 +30,12 @@ int main(int argc, char **argv){
     // Get the solutions:
     int n_sols;
     printf("Starting search...\n");
+    clock_t start = clock();
     solution **sols = new_find_best_solutions(prob,
         pool_size, vision_range, &n_sols);
-    printf("Search done!\n");
+    clock_t end = clock();
+    float seconds = (float)(end - start) / CLOCKS_PER_SEC;
+    printf("Search done in %f [s]!\n",seconds);
     // Print best solutions
     printf("Best solutions:\n");
     int sols_show = n_sols;
@@ -41,7 +44,8 @@ int main(int argc, char **argv){
         print_solution(stdout,sols[i]);
     }
     printf("Saving solutions...\n");
-    save_solutions(argv[5],sols,sols_show,input_file,pool_size,vision_range);
+    save_solutions(argv[5],sols,sols_show,input_file,pool_size,vision_range,
+        seconds);
     // Free memory
     for(int i=0;i<n_sols;i++){
         free(sols[i]);

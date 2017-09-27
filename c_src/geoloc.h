@@ -54,7 +54,7 @@ solution **new_find_best_solutions(problem* prob,
 problem *new_problem_load(const char *file);
 
 void save_solutions(const char *file, solution **sols, int n_sols,
-        const char *input_file, int pool_size, int vision_range);
+        const char *input_file, int pool_size, int vision_range, float seconds);
 
 static inline void print_solution(FILE *f, const solution *sol){
     fprintf(f,"SOLUTION:\n");

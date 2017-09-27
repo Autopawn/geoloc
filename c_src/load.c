@@ -114,7 +114,7 @@ problem *new_problem_load(const char *file){
 }
 
 void save_solutions(const char *file, solution **sols, int n_sols,
-        const char *input_file, int pool_size, int vision_range){
+        const char *input_file, int pool_size, int vision_range, float seconds){
     FILE *fp;
     printf("Opening file \"%s\"...\n",file);
     fp = fopen(file,"w");
@@ -123,6 +123,7 @@ void save_solutions(const char *file, solution **sols, int n_sols,
         exit(1);
     }
     // Print some aditional info:
+    fprintf(fp,"# Time: %f\n",seconds);
     fprintf(fp,"# Input file: %s\n",input_file);
     fprintf(fp,"# Pool size: %d\n",pool_size);
     fprintf(fp,"# Vision range: %d\n",vision_range);
