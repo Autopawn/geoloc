@@ -105,22 +105,36 @@ lint solution_add(const problem *prob, solution *sol, int newf){
     return delta;
 }
 
-// Returns the dissimilitude (using modified Hausdorff distance without coeficients).
+// Returns the dissimilitude (using mean geometric error or Hausdorff).
 lint solution_dissimilitude(const problem *prob,
         const solution *sol_a, const solution *sol_b){
     lint disim = 0;
     for(int t=0;t<2;t++){
-        // Add distance from each facility in a to the set of facilities of b.
-        for(int ai=0;ai<sol_a->n_facilities;ai++){
-            lint min_dist = -1;
-            for(int bi=0;bi<sol_b->n_facilities;bi++){
+        #ifdef HAUSDORFF
+            for(int ai=0;ai<sol_a->n_facilities;ai++){
                 int f_a = sol_a->facilities[ai];
-                int f_b = sol_b->facilities[bi];
-                lint dist = prob->fdistances[f_a][f_b];
-                if(min_dist==-1 || dist<min_dist) min_dist = dist;
+                lint cmin = MAX_LINT;
+                for(int bi=0;bi<sol_b->n_facilities;bi++){
+                    int f_b = sol_b->facilities[bi];
+                    lint dist = prob->fdistances[f_a][f_b];
+                    if(dist<cmin) cmin = dist;
+                    if(cmin<disim) break;
+                }
+                if(cmin>disim && MAX_LINT>cmin) disim = cmin;
             }
-            disim += min_dist;
-        }
+        #else
+            // Add distance from each facility in A to B.
+            for(int ai=0;ai<sol_a->n_facilities;ai++){
+                lint min_dist = -1;
+                int f_a = sol_a->facilities[ai];
+                for(int bi=0;bi<sol_b->n_facilities;bi++){
+                    int f_b = sol_b->facilities[bi];
+                    lint dist = prob->fdistances[f_a][f_b];
+                    if(min_dist==-1 || dist<min_dist) min_dist = dist;
+                }
+                disim += min_dist;
+            }
+        #endif
         // Swap solutions for 2nd iteration:
         const solution *aux = sol_a;
         sol_a = sol_b;

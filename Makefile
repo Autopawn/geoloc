@@ -1,3 +1,4 @@
+geoloc_all: geoloc geoloc_hausdorff
 clean:
 	mkdir -p results
 	rm geoloc.pdf || true
@@ -7,6 +8,9 @@ hstest:
 	cd hs_src; ghc -O2 Test.hs -o ../htest.exe
 geoloc:
 	cd c_src; gcc -O -Wall -lm geoloc.c load.c main.c -o ../geoloc.exe
+geoloc_hausdorff:
+	cd c_src; gcc -O -Wall -lm geoloc.c load.c main.c -D HAUSDORFF -o \
+		../geoloc_hd.exe
 geoloc_verbose:
 	cd c_src; gcc -O -Wall -lm geoloc.c load.c main.c -D VERBOSE -o \
 		../geoloc.exe

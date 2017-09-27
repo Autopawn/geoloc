@@ -1,6 +1,7 @@
 #ifndef GEOLOC_H
 #define GEOLOC_H
 
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,6 +13,8 @@
 typedef long long int lint;
 typedef unsigned int uint;
 typedef unsigned short ushort;
+
+#define MAX_LINT LLONG_MAX
 
 typedef struct{
     int n_facilities, n_clients;
