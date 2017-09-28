@@ -28,13 +28,14 @@ int main(int argc, char **argv){
     // Load problem file:
     problem *prob = new_problem_load(input_file);
     // Get the solutions:
-    int n_sols;
+    int n_sols, max_size_found;
     printf("Starting search...\n");
     clock_t start = clock();
     solution **sols = new_find_best_solutions(prob,
-        pool_size, vision_range, &n_sols);
+        pool_size, vision_range, &n_sols, &max_size_found);
     clock_t end = clock();
     float seconds = (float)(end - start) / CLOCKS_PER_SEC;
+    printf("Max size solution found: %d\n",max_size_found);
     printf("Search done in %f [s]!\n",seconds);
     // Print best solutions
     printf("Best solutions:\n");
@@ -45,7 +46,7 @@ int main(int argc, char **argv){
     }
     printf("Saving solutions...\n");
     save_solutions(argv[5],sols,sols_show,input_file,pool_size,vision_range,
-        seconds);
+        seconds,max_size_found);
     // Free memory
     for(int i=0;i<n_sols;i++){
         free(sols[i]);

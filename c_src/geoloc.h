@@ -49,12 +49,13 @@ struct _solution {
 typedef struct _solution solution;
 
 solution **new_find_best_solutions(problem* prob,
-        int pool_size, int vision_range, int *final_n);
+        int pool_size, int vision_range, int *final_n, int *max_sol_size);
 
 problem *new_problem_load(const char *file);
 
 void save_solutions(const char *file, solution **sols, int n_sols,
-        const char *input_file, int pool_size, int vision_range, float seconds);
+        const char *input_file, int pool_size, int vision_range,
+        float seconds, int max_sol_size);
 
 static inline void print_solution(FILE *f, const solution *sol){
     fprintf(f,"SOLUTION:\n");

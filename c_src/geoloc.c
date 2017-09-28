@@ -420,7 +420,7 @@ void reduce_solutions(const problem *prob,
 
 
 solution **new_find_best_solutions(problem* prob,
-        int pool_size, int vision_range, int *final_n){
+        int pool_size, int vision_range, int *final_n, int *max_sol_size){
     //
     printf("Computing 'nearest' table optimization...\n");
     problem_compute_nearest(prob);
@@ -436,6 +436,7 @@ solution **new_find_best_solutions(problem* prob,
     pools[0] = pool0;
     pools_size[0] = 1;
     // Create all the next pools:
+    *max_sol_size = 0;
     int total_pools_size = 0;
     for(int i=1;i<=MAX_FACILITIES;i++){
         printf("Expanding %d solutions of size %d...\n",pools_size[i-1],i-1);
@@ -446,6 +447,7 @@ solution **new_find_best_solutions(problem* prob,
         print_solsets(pools[i],pools_size[i]);
         #endif
         if(pools_size[i]==0){
+            *max_sol_size = i-1;
             printf("No more valuable solutions of size %d!\n",i);
             break;
         }
