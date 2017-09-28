@@ -124,9 +124,14 @@ void save_solutions(const char *file, solution **sols, int n_sols,
     }
     // Print some aditional info:
     fprintf(fp,"# Time: %f\n",seconds);
-    fprintf(fp,"# Input file: %s\n",input_file);
-    fprintf(fp,"# Pool size: %d\n",pool_size);
-    fprintf(fp,"# Vision range: %d\n",vision_range);
+    fprintf(fp,"# Input_file: %s\n",input_file);
+    fprintf(fp,"# Pool_size: %d\n",pool_size);
+    fprintf(fp,"# Vision_range: %d\n",vision_range);
+    #ifdef HAUSDORFF
+    fprintf(fp,"# Dissimilitude: HAUSDORFF\n");
+    #else
+    fprintf(fp,"# Dissimilitude: MEAN_GEOMETRIC_ERROR\n");
+    #endif
     // Print the solutions:
     for(int i=0;i<n_sols;i++){
         print_solution(fp,sols[i]);

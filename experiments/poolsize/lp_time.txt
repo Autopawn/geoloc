@@ -1,0 +1,5 @@
++ lp_solve problem.lp
+
+real	0m0.314s
+user	0m0.307s
+sys	0m0.004s
