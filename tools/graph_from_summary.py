@@ -14,7 +14,7 @@ if __name__ == '__main__':
             if li=="": continue
             name,sx,sy = li.split()
             sx = int(sx)
-            sy = int(sy)
+            sy = float(sy)
             if name not in points:
                 points[name] = []
             points[name].append((sx,sy))
@@ -28,7 +28,7 @@ if __name__ == '__main__':
         ax = plt.subplot(111)
 
         i = 0
-        for name in points:
+        for name in sorted(points.keys()):
             col = color[i]
             i += 1
             tpoints = np.array(points[name])

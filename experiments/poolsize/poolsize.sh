@@ -33,5 +33,8 @@ grep -R "Value:" results | sort | sed -e "$REGEXV" > summary_values.txt
 REGEXT='s/^results\/\(\w\+\)_\([0-9]\+\).*:#.*\([0-9]\+\.[0-9]\+\).*/\1 \2 \3/'
 grep -R "Time:" results | sort | sed -e "$REGEXT" > summary_times.txt
 
-# Create graph
-python3 ../../tools/graph_from_summary.py 'Best solution value v/s $POOL\_SIZE$ \n $|Z|='$NFACS',|C|='$MCLIE',\gamma='$FCOST',\alpha='$VGAIN',\beta='$TCOST'$. Full vision range.' summary_values.txt value_graph.png
+# Create value graph
+python3 ../../tools/graph_from_summary.py 'Best solution value v/s $POOL\_SIZE$ \n $|Z|='$NFACS',|C|='$MCLIE',\gamma='$FCOST',\alpha='$VGAIN',\beta='$TCOST'$. Full vision range.' summary_values.txt graph_values.png
+
+# Create time graph
+python3 ../../tools/graph_from_summary.py 'Execution time [s] v/s $POOL\_SIZE$ \n $|Z|='$NFACS',|C|='$MCLIE',\gamma='$FCOST',\alpha='$VGAIN',\beta='$TCOST'$. Full vision range.' summary_times.txt graph_time.png
