@@ -1,3 +1,6 @@
+# Mine
+.remote-sync.json
+
 # Output
 best*.asy
 best*.svg
