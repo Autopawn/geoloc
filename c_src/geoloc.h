@@ -48,6 +48,8 @@ struct _solution {
 
 typedef struct _solution solution;
 
+solution empty_solution();
+
 solution **new_find_best_solutions(problem* prob,
         int pool_size, int vision_range, int *final_n, int *max_sol_size);
 

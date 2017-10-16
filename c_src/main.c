@@ -45,8 +45,15 @@ int main(int argc, char **argv){
         print_solution(stdout,sols[i]);
     }
     printf("Saving solutions...\n");
-    save_solutions(argv[5],sols,sols_show,input_file,pool_size,vision_range,
-        seconds,max_size_found);
+    if(sols_show==0){
+        solution empty_sol = empty_solution();
+        solution *empty_sol_p = &empty_sol;
+        save_solutions(argv[5],&empty_sol_p,1,input_file,pool_size,vision_range,
+            seconds,max_size_found);
+    }else{
+        save_solutions(argv[5],sols,sols_show,input_file,pool_size,vision_range,
+            seconds,max_size_found);
+    }
     // Free memory
     for(int i=0;i<n_sols;i++){
         free(sols[i]);
