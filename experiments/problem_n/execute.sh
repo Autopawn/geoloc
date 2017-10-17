@@ -1,5 +1,15 @@
 #!/bin/bash -e
+#PBS -o result.out -e result.err -l walltime=200:00:00
 
+# Tunning for the HPC clúster:
+if [ -n "${PBS_O_WORKDIR+1}" ]; then
+    cd "$PBS_O_WORKDIR"
+    export lp_solve="$HOME/lp_solve_5.5/lp_solve/bin/ux64/lp_solve"
+else
+    export lp_solve="lp_solve"
+fi
+
+rm result.err result.out || true
 rm -rf results || true
 mkdir -p results
 
@@ -14,19 +24,18 @@ for nn in {20..10000..20}; do
             mkdir -p "$foldname"
             # Create token to see what folder was running when halted
             touch "$foldname-was-runing"
-            len=$(python3 -c "print(int((1000000.0*$nn/$density)**.5))")
+            len=$(python -c "print(int((1000000.0*$nn/$density)**.5))")
             for tt in {1..50}; do (
                 # Create random test case
                 ttt=$(printf "%04d" $tt)
                 filename="$foldname/problem-$ttt"
-                python3 ../../tools/problem_generator.py deesu \
+                python ../../tools/problem_generator.py deesu \
                     $nn $nn $len 1000 $alpha 1 \
                     "$filename.txt" "$filename-pos.txt"
-                rm "$filename-pos.txt"
-                python3 ../../tools/lp_problem_translator.py \
+                python ../../tools/lp_problem_translator.py \
                     "$filename.txt" "$filename.lp"
                 # Solve it with lp_solve
-                { time -p lp_solve "$filename.lp" > "$filename-lp-res.txt"; } \
+                { time -p $lp_solve "$filename.lp" > "$filename-lp-res.txt"; } \
                     2> "$filename-lp-time.txt"
                 # Solve it with greedy
                 ../../geoloc.exe 1 1 1 "$filename.txt" "$filename-gd-res.txt"
@@ -34,16 +43,16 @@ for nn in {20..10000..20}; do
             done
             wait
             # Create files to store results of linear programming optimal sol.
-            grep -R "user" "$foldname/"problem-*-lp-time.txt | \
+            grep -R "user" $foldname/problem-*-lp-time.txt | \
                 awk '{print $NF}' > "$foldname/lp-times.txt"
-            grep -R "objective function:" "$foldname/"problem-*-lp-res.txt | \
+            grep -R "objective function:" $foldname/problem-*-lp-res.txt | \
                 awk '{print $NF}' | cut -d'.' -f1 > "$foldname/lp-res.txt"
             for d in "$foldname/"problem-*-lp-res.txt; do cat "$d" | \
                 grep "X" | grep " 1" | wc -l ; done > "$foldname/lp-nfacs.txt"
             # Create files to store results of greedy sol.
-            grep -R "Value:" "$foldname/"problem-*-gd-res.txt | \
+            grep -R "Value:" $foldname/problem-*-gd-res.txt | \
                 awk '{print $NF}' > "$foldname/gd-res.txt"
-            grep -R "Facilities:" "$foldname/"problem-*-gd-res.txt | \
+            grep -R "Facilities:" $foldname/problem-*-gd-res.txt | \
                 awk '{print $NF}' > "$foldname/gd-nfacs.txt"
             # Delete token
             rm "$foldname-was-runing"
