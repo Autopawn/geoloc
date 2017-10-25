@@ -1,7 +1,9 @@
 #!/bin/bash -e
-#PBS -o result.out -e result.err -l walltime=200:00:00
+#PBS -o result.out -e result.err
+#PBS -l cput=8000:00:01
+#PBS -l walltime=8000:00:01
 
-# Tunning for the HPC clúster:
+# Tunning for the HPC cluster:
 if [ -n "${PBS_O_WORKDIR+1}" ]; then
     cd "$PBS_O_WORKDIR"
     export lp_solve="$HOME/lp_solve_5.5/lp_solve/bin/ux64/lp_solve"
@@ -13,7 +15,13 @@ rm result.err result.out || true
 rm -rf results || true
 mkdir -p results
 
-for nn in {20..10000..20}; do
+# v deesu o dtesu
+problemk=dtesu
+
+# v created with np.array(np.round(np.logspace(1,3,15,base=10)),dtype='int32')
+nntests="10 14 19 27 37 52 72 100 139 193 268 373 518 720 1000"
+
+for nn in $nntests; do
     for density in 50 100 150; do
         for alpha in 200 400 600; do
             nnn=$(printf "%05d" $nn)
@@ -25,11 +33,11 @@ for nn in {20..10000..20}; do
             # Create token to see what folder was running when halted
             touch "$foldname-was-runing"
             len=$(python -c "print(int((1000000.0*$nn/$density)**.5))")
-            for tt in {1..50}; do (
+            for tt in {1..20}; do (
                 # Create random test case
                 ttt=$(printf "%04d" $tt)
                 filename="$foldname/problem-$ttt"
-                python ../../tools/problem_generator.py deesu \
+                python ../../tools/problem_generator.py $problemk \
                     $nn $nn $len 1000 $alpha 1 \
                     "$filename.txt" "$filename-pos.txt"
                 python ../../tools/lp_problem_translator.py \
@@ -56,6 +64,8 @@ for nn in {20..10000..20}; do
                 awk '{print $NF}' > "$foldname/gd-nfacs.txt"
             # Delete token
             rm "$foldname-was-runing"
+            # Delete the no longer useful files:
+            rm $foldname/problem-*
         done
     done
 done

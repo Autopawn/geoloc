@@ -7,8 +7,8 @@
 #include <string.h>
 #include <assert.h>
 
-#define MAX_FACILITIES 512
-#define MAX_CLIENTS 512
+#define MAX_FACILITIES 1024
+#define MAX_CLIENTS 1024
 
 typedef long long int lint;
 typedef unsigned int uint;

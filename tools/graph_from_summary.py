@@ -40,8 +40,8 @@ if __name__ == '__main__':
         ax.set_position([box.x0, box.y0 + box.height * 0.1,
             box.width, box.height * 0.9])
 
-
-        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
-            ncol=len(points))
+        if len(points)>1:
+            ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
+                ncol=len(points))
 
         fig.savefig(sys.argv[3])
