@@ -90,7 +90,7 @@ def generate_svg(pos_file,sols_file,svg_file,size=1024,labels=False):
                     color = "blue"
                 else:
                     dist = ((facxpos[i]-clixpos[k])**2+(facypos[i]-cliypos[k])**2)**0.5
-                    grad = int(255.0*dist*tcost/vgain)
+                    grad = int(205.0*dist*tcost/vgain)
                     color = "rgb(%d,%d,255)"%(grad,grad)
                 svgfile.write("<line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" stroke=\"%s\" stroke-width=\"2\"/>\n"%(
                 facxpos[i]*scale[0],facypos[i]*scale[1],

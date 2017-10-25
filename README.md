@@ -8,33 +8,39 @@ The main version of the algorithm is done in the C language. To compile and crea
 $ make geoloc
 ```
 
-To create a test problem with `100` facilities and clients (of weight 1) on the same, randomly distributed, positions over a rectangle of size `1000`, with a facility fixed cost of `800`, a variant gain of `300`, and transport cost per weight unit of `1`:
+To create a random test problem with `100` clients and `50` facility locations on a rectangle of size `1000`, with a facility fixed cost of `800`, a variant gain of `300`, and transport cost per weight unit of `1`:
 
 ```bash
-$ python3 tools/problem_generator.py seesu 100 1000 800 300 1 cases/test_case.txt cases/test_case.pos
+$ mkdir -p cases
+$ python3 tools/prob_generator.py 100 50 1000 800 300 1 cases/test_prob.txt
 ```
 
-This will create the file `cases/test_case.txt` with the problem definition and `cases/test_case.pos` with the positions of the facilities and clients (used later for the creation of images).
+This will create the file `cases/test_prob.txt` with a generic definition of the problem.
 
-To run the program over the test case, with a pool of `1000` and a vision range of `100`, saving the `10` best solutions to the `results/test_result.txt` file:
+To create a definition of the problem that can be used as input for `geoloc`, you use te translator:
 
 ```bash
-$ mkdir -p results
-$ ./geoloc.exe 1000 100 10 cases/test_case.txt results/test_result.txt
+$ python3 tools/prob_translator.py cases/test_prob.txt geoloc cases/test_geoloc_prob.txt
+```
+
+To run the program over the test case, with a pool size of `100` and a vision range of `20`, saving the `10` best solutions to the `cases/test_res.txt` file:
+
+```bash
+$ ./geoloc.exe 100 20 10 cases/test_geoloc_prob.txt cases/test_res.txt
 ```
 
 To create an `svg` image of the best solution:
 
 ```bash
-python3 tools/svg_generator.py cases/test_case.pos results/test_result.txt test_solution.svg
+$ python3 tools/svg_generator.py -i cases/test_res.txt cases/test_prob.txt cases/test_res.svg
 ```
 
-`test_solution.svg` is the resulting image.
+`cases/test_res.svg` is the resulting image.
 
 To create a linear programming problem for `lp_solve` from the test case:
 
 ```bash
-python3 tools/lp_problem_translator.py cases/test_case.txt cases/test_case.lp
+$ python3 tools/prob_translator.py cases/test_prob.txt lpsolve cases/test_lp_prob.lp
 ```
 
 ### Problem file format
@@ -71,7 +77,3 @@ $ cabal install <package>
 ```
 
 * Package `munkres` for the hungarian method, thanks to *Balazs Komuves*.
-
-## Document compilation
-
-* `texlive-babel-spanish`.
