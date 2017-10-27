@@ -32,7 +32,7 @@ $ ./geoloc.exe 100 20 10 cases/test_geoloc_prob.txt cases/test_res.txt
 To create an `svg` image of the best solution:
 
 ```bash
-$ python3 tools/svg_generator.py -i cases/test_res.txt cases/test_prob.txt cases/test_res.svg
+$ python3 tools/svg_generator.py -g cases/test_res.txt cases/test_prob.txt cases/test_res.svg
 ```
 
 `cases/test_res.svg` is the resulting image.

@@ -2,7 +2,7 @@ import numpy as np
 
 from sys import argv
 
-def generate_svg(pos_file,sols_file,svg_file,size=1024,labels=False):
+def generate_svg(pos_file,geoloc_sol,lpsolve_sol,svg_file,size=1024,labels=False):
     # Read positions:
     dims = None
     pfile = open(pos_file,"r")
@@ -46,8 +46,8 @@ def generate_svg(pos_file,sols_file,svg_file,size=1024,labels=False):
     cliypos = np.array(cliypos)
     # Read solutions:
     best_sol = None
-    if sols_file!=None:
-        sfile = open(sols_file,"r")
+    if geoloc_sol!=None:
+        sfile = open(geoloc_sol,"r")
         for lin in sfile:
             lin = lin.strip()
             if lin[0]=='#': continue
@@ -66,6 +66,41 @@ def generate_svg(pos_file,sols_file,svg_file,size=1024,labels=False):
                     o_indexes = [int(x) for x in lin[1].split()]
                     best_sol[f_index] = o_indexes
         sfile.close()
+    elif lpsolve_sol!=None:
+        best_sol = {}
+        sfile = open(lpsolve_sol,"r")
+        for lin in sfile:
+            lin = lin.strip()
+            if len(lin)==0: continue
+            if lin[0]=="X":
+                val = int(lin.split()[1])
+                lin = lin.split()[0]
+                fac = int(lin[1:])
+                if val>0: best_sol[fac] = []
+            elif lin[0]=="Y":
+                val = int(lin.split()[1])
+                lin = lin.split()[0]
+                lin = lin[1:].split("c")
+                cli = int(lin[0])
+                fac = int(lin[1])
+                if val>0: best_sol[fac].append(cli)
+            elif lin[0]=="Z":
+                val = int(lin.split()[1])
+                lin = lin.split()[0]
+                cli = int(lin[1:])
+                if val==1:
+                    # Find nearest fac:
+                    nearest_dist = None
+                    nearest_fac = None
+                    for fa in best_sol:
+                        dist = ((facxpos[fa]-clixpos[cli])**2+(facypos[fa]-cliypos[cli])**2)**0.5
+                        if nearest_dist==None or dist<nearest_dist:
+                            nearest_dist = dist
+                            nearest_fac = fa
+                    assert(nearest_fac!=None)
+                    best_sol[nearest_fac].append(cli)
+        sfile.close()
+
     # Write SVG file:
     svgfile = open(svg_file,"w")
     svgfile.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
@@ -110,21 +145,28 @@ def generate_svg(pos_file,sols_file,svg_file,size=1024,labels=False):
 if __name__ == '__main__':
     nargs = []
     flags = []
-    solfile = None
-    addnext = False
-    for a in argv:
+    geolocsolfile = None
+    lpsolfile = None
+    i = 0
+    while i<len(argv):
+        a = argv[i]
         if a[0]=='-':
-            if a=="-i":
-                addnext  = True
+            if a=="-g" or a=="-p":
+                if i+1>=len(argv) or geolocsolfile or lpsolfile:
+                    nargs = []
+                    break
+                if a=="-g":
+                    geolocsolfile = argv[i+1]
+                elif a=="-p":
+                    lpsolfile = argv[i+1]
+                i+=1
             else:
                 flags.append(a)
-        elif addnext:
-            solfile = a
-            addnext = False
         else:
             nargs.append(a)
+        i+=1
     if len(nargs)!=3:
         print("Usage:")
-        print("%s <probfname> [-l] [-i <geolocsolfile>] <outfile>"%argv[0])
+        print("%s <probfname> [-l] [-g <geolocsolfile> | -p <lpsolfile>] <outfile>"%argv[0])
     else:
-        generate_svg(nargs[1],solfile,nargs[2],labels='-l' in flags)
+        generate_svg(nargs[1],geolocsolfile,lpsolfile,nargs[2],labels='-l' in flags)
