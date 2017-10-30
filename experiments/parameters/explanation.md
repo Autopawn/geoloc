@@ -64,3 +64,9 @@ The number of facilities doesn't change too much for different values of $C$ exc
 <!-- Confirm more this last one assertion ^ -->
 
 As $P$ gets larger the number of optimal facilities decreases, a value of $0.05$ results in about 5 facilities for a *normal* value of $C$.
+
+# Executing tests
+
+`./generate.sh` Generates the tests.
+`./solve.sh` Runs the tests and saves the solutions.
+`./summary.sh` Takes the solutions and merges them.
