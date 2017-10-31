@@ -23,7 +23,7 @@ cd problems; for foldr in * ; do
     for file in "$foldr"/* ; do (
         # Get the optimal solution:
         python ../../../tools/prob_translator.py "$file" lpsolve ../solutions/"$file".lp
-        lp_solve ../solutions/"$file".lp > ../solutions/"$file"
+        $lp_solve ../solutions/"$file".lp > ../solutions/"$file"
         rm ../solutions/"$file".lp
         # Create an SVG image
         if [ "$file" == "$foldr"/prob_1 ]; then

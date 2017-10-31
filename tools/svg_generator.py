@@ -122,7 +122,7 @@ def generate_svg(pos_file,geoloc_sol,lpsolve_sol,svg_file,size=1024,labels=False
         for i in best_sol:
             for k in best_sol[i]:
                 if tread:
-                    color = "blue"
+                    color = "green"
                 else:
                     dist = ((facxpos[i]-clixpos[k])**2+(facypos[i]-cliypos[k])**2)**0.5
                     grad = int(205.0*dist*tcost/vgain)

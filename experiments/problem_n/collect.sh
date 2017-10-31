@@ -1,3 +1,5 @@
+# BEING MANTAINED!!!!
+
 #!/bin/bash -e
 
 mkdir -p collect

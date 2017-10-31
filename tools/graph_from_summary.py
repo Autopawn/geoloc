@@ -4,7 +4,7 @@ import numpy as np
 
 if __name__ == '__main__':
     if len(sys.argv)!=4:
-        print("Usage: %s <title> <summary_file> <output>"%sys.argv[0])
+        print("Usage: python %s <title> <summary_file> <output>"%sys.argv[0])
     else:
         points = {}
 
