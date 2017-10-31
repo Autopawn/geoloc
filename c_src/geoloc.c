@@ -7,7 +7,7 @@
 inline void *safe_malloc(size_t size){
     void *ptr = malloc(size);
     if(size>0 && ptr==NULL){
-        printf("ERROR: Not enough memory!\n");
+        fprintf(stderr,"ERROR: Not enough memory!\n");
         exit(1);
     }
     return ptr;
@@ -309,6 +309,7 @@ solution **new_expand_solutions(const problem *prob,
 // Reduces an array (sols) with pointers to a set of solutions to target_n size, freeing memory of the discarted ones. *n_sols is modified.
 void reduce_solutions(const problem *prob,
         solution **sols, int *n_sols, int target_n, int vision_range){
+    if(vision_range>*n_sols) vision_range = *n_sols;
     // Sort solution pointers from larger to smaller value of the solution.
     qsort(sols,*n_sols,sizeof(solution*),solution_value_cmp_inv);
     // Return if there is no need of reduction.

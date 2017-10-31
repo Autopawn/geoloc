@@ -34,7 +34,7 @@ int main(int argc, char **argv){
     solution **sols = new_find_best_solutions(prob,
         pool_size, vision_range, &n_sols, &max_size_found);
     clock_t end = clock();
-    float seconds = (float)(end - start) / CLOCKS_PER_SEC;
+    float seconds = (float)(end - start) / (float)CLOCKS_PER_SEC;
     printf("Max size solution found: %d\n",max_size_found);
     printf("Search done in %f [s]!\n",seconds);
     // Print best solutions
