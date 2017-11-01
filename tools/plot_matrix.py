@@ -12,7 +12,7 @@ def colori(kk,nn):
     if kk==nn-1: return (1.0,0,0)
     if kk==1 and nn==3: return (0,0,1.0)
     flt = (kk-1.0)/(nn-3.0)
-    return (0,1-flt,flt))
+    return (0,1-flt,flt)
 
 
 
