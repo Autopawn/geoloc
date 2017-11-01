@@ -30,7 +30,7 @@ if __name__ == '__main__':
         nnvals = sorted(list(set([nn for (_,nn,_,_) in points.keys()])))
         namevals = sorted(list(set([nam for (nam,_,_,_) in points.keys()])))[::-1]
 
-        f, axarr = plt.subplots(len(denvals),len(alphavals),sharex=True,sharey=True)
+        fig, axarr = plt.subplots(len(denvals),len(alphavals),sharex=True,sharey=True)
 
         for i in range(len(denvals)):
             den = denvals[i]
@@ -50,4 +50,5 @@ if __name__ == '__main__':
                     if logy: axarr[i,j].set_yscale('log')
                     axarr[i,j].plot(dots[:,0],dots[:,1],figures[k],color=colors[k])
                     axarr[i,j].plot(mynnvals,mean,'-',color=colors[k])
-        plt.show()
+
+        fig.savefig(sys.argv[2])
