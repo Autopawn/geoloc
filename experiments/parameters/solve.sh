@@ -6,6 +6,7 @@
 # Tunning for the HPC cluster:
 if [ -n "${PBS_O_WORKDIR+1}" ]; then
     cd "$PBS_O_WORKDIR"
+    rm result.err result.out || true
     export lp_solve="$HOME/lp_solve_5.5/lp_solve/bin/ux64/lp_solve"
 else
     export lp_solve="lp_solve"

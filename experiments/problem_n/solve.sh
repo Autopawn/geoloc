@@ -1,3 +1,6 @@
+
+# NOTE: I AM WORKING ON THIS!
+
 #!/bin/bash -e
 #PBS -o result.out -e result.err
 #PBS -l cput=8000:00:01
@@ -6,6 +9,7 @@
 # Tunning for the HPC cluster:
 if [ -n "${PBS_O_WORKDIR+1}" ]; then
     cd "$PBS_O_WORKDIR"
+    rm result.err result.out || true
     export lp_solve="$HOME/lp_solve_5.5/lp_solve/bin/ux64/lp_solve"
 else
     export lp_solve="lp_solve"
@@ -24,10 +28,10 @@ cd problems; for foldr in * ; do
     touch ../solutions/"$foldr"/lp_nfacs.txt
     touch ../solutions/"$foldr"/lp_vals.txt
     touch ../solutions/"$foldr"/lp_times.txt
-    for pz in poolsizes ; do
-        touch ../solutions/"$foldr"/gd_$pz_nfacs.txt
-        touch ../solutions/"$foldr"/gd_$pz_vals.txt
-        touch ../solutions/"$foldr"/gd_$pz_times.txt
+    for pz in $poolsizes ; do
+        touch ../solutions/"$foldr"/gl_"$pz"_nfacs.txt
+        touch ../solutions/"$foldr"/gl_"$pz"_vals.txt
+        touch ../solutions/"$foldr"/gl_"$pz"_times.txt
     done
     #
     for file in "$foldr"/* ; do (
@@ -44,7 +48,7 @@ cd problems; for foldr in * ; do
             awk '{print $NF}' | cut -d'.' -f1 >> ../solutions/"$foldr"/lp_vals.txt
         # Get time
         cat ../solutions/"$file"_lp_times | grep "user" | \
-            awk '{print $NF}' > ../solutions/"$foldr"/lp_times.txt
+            awk '{print $NF}' >> ../solutions/"$foldr"/lp_times.txt
         # Delete solution to save space on the HPC cluster:
         if [ -n "${PBS_O_WORKDIR+1}" ]; then
             rm ../solutions/"$file"_lp_sol
@@ -52,26 +56,26 @@ cd problems; for foldr in * ; do
         fi
         #### Get the geoloc solutions
         python ../../../tools/prob_translator.py "$file" geoloc ../solutions/"$file".gl
-        for pz in poolsizes ; do
+        for pz in $poolsizes ; do
             if [ $pz -eq 1 ]; then
                 vrange=1
             else
                 vrange=10000000
             fi
             ../../../geoloc.exe "$pz" "$vrange" 1 ../solutions/"$file".gl \
-                ../solutions/"$file"_gd_$pz_sol
+                ../solutions/"$file"_gl_"$pz"_sol
             # Get number of facilities
-            cat ../solutions/"$file"_gd_$pz_sol | grep "Facilities:" | \
-                awk '{print $NF}' >> ../solutions/"$foldr"/gd_$pz_nfacs.txt
+            cat ../solutions/"$file"_gl_"$pz"_sol | grep "Facilities:" | \
+                awk '{print $NF}' >> ../solutions/"$foldr"/gl_"$pz"_nfacs.txt
             # Get value of objective function
-            cat ../solutions/"$file"_gd_$pz_sol | grep "Value:" | \
-                awk '{print $NF}' >> ../solutions/"$foldr"/gd_$pz_vals.txt
+            cat ../solutions/"$file"_gl_"$pz"_sol | grep "Value:" | \
+                awk '{print $NF}' >> ../solutions/"$foldr"/gl_"$pz"_vals.txt
             # Get time
-            cat ../solutions/"$file"_gd_$pz_sol | grep "Time:" | \
-                awk '{print $NF}' >> ../solutions/"$foldr"/gd_$pz_times.txt
+            cat ../solutions/"$file"_gl_"$pz"_sol | grep "Time:" | \
+                awk '{print $NF}' >> ../solutions/"$foldr"/gl_"$pz"_times.txt
             # Delete solution
             if [ -n "${PBS_O_WORKDIR+1}" ]; then
-                rm ../solutions/"$file"_gd_$pz_sol
+                rm ../solutions/"$file"_gl_"$pz"_sol
             fi
         done
         rm ../solutions/"$file".gl

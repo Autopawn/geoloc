@@ -5,10 +5,12 @@ rm -rf solutions || true
 
 mkdir problems
 
-nntests="10 14 19 27 37 52 72 100 139 193 268 373 518 720 1000"
+# nntests="10 14 19 27 37 52 72 100 139 193 268 373 518 720 1000"
+# ncases=20
+nntests="10 50 100"
+ncases=3
 pptests="0.25 0.05 0.10"
 cctests="0.30 0.50 0.70"
-ncases=20
 
 # Generate problems:
 for nn in $nntests; do

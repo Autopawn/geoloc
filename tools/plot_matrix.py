@@ -1,5 +1,9 @@
 import sys
 import matplotlib
+
+# v So that doens't trow error through ssh.
+matplotlib.use('Agg')
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -31,8 +35,6 @@ if __name__ == '__main__':
         nnvals = sorted(list(set([nn for (_,nn,_,_) in points.keys()])))
         namevals = sorted(list(set([nam for (nam,_,_,_) in points.keys()])))[::-1]
 
-        # v So that doens't trow error through ssh.
-        matplotlib.use('Agg')
         fig, axarr = plt.subplots(len(denvals),len(alphavals),sharex=True,sharey=True)
 
         for i in range(len(denvals)):
