@@ -19,7 +19,7 @@ if __name__ == '__main__':
             li = li.strip()
             if li=="": continue
             name,nn,alpha,density,yvalue = li.split()
-            key = (name,int(nn),int(alpha),int(density))
+            key = (name,int(nn),float(alpha),float(density))
             if key not in points:
                 points[key] = []
             points[key].append(float(yvalue))
