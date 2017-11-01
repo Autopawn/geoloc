@@ -9,10 +9,10 @@ import numpy as np
 
 def colori(kk,nn):
     if kk==0: return (0,0,0)
-    if kk==nn-1: return (255,0,0)
-    if kk==1 and nn==3: return (0,0,255)
+    if kk==nn-1: return (1.0,0,0)
+    if kk==1 and nn==3: return (0,0,1.0)
     flt = (kk-1.0)/(nn-3.0)
-    return (0,255-int(flt*255),int(flt*255))
+    return (0,1-flt,flt))
 
 
 
