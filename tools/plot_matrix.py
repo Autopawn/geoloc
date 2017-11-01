@@ -7,7 +7,14 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 
-colors = ["red","black","green","blue"]
+def colori(kk,nn):
+    if kk==0: return (0,0,0)
+    if kk==nn-1: return (255,0,0)
+    if kk==1 and nn==3: return (0,0,255)
+    flt = (kk-1.0)/(nn-3.0)
+    return (0,255-int(flt*255),int(flt*255))
+
+
 
 if __name__ == '__main__':
     if len(sys.argv)<3:
@@ -52,7 +59,7 @@ if __name__ == '__main__':
                     axarr[i,j].set_title("$D=%d$  $\\alpha=%d$"%(den,alpha))
                     if logx: axarr[i,j].set_xscale('log')
                     if logy: axarr[i,j].set_yscale('log')
-                    axarr[i,j].plot(dots[:,0],dots[:,1],"o",color=k/float(len(alphavals)))
-                    axarr[i,j].plot(mynnvals,mean,'-',color=k/float(len(alphavals)))
+                    axarr[i,j].plot(dots[:,0],dots[:,1],"o",color=colori(k,float(len(alphavals))))
+                    axarr[i,j].plot(mynnvals,mean,'-',color=colori(k,float(len(alphavals))))
 
         fig.savefig(sys.argv[2])
