@@ -17,15 +17,18 @@ def colori(kk,nn):
 
 
 if __name__ == '__main__':
-    if len(sys.argv)<3:
-        print("Usage: %s <summary_file> <output>"%sys.argv[0])
+    argis = []
+    for arg in sys.argv:
+        if arg[0]!='-': argis.append(arg)
+    if len(argis)<3:
+        print("Usage: %s [-lx] [-ly] <summary_file> <output>"%argis[0])
     else:
         logx = "-lx" in sys.argv
         logy = "-ly" in sys.argv
 
         points = {}
         #
-        inputf = open(sys.argv[1])
+        inputf = open(argis[1])
         for li in inputf:
             li = li.strip()
             if li=="": continue
@@ -41,13 +44,14 @@ if __name__ == '__main__':
         nnvals = sorted(list(set([nn for (_,nn,_,_) in points.keys()])))
         namevals = sorted(list(set([nam for (nam,_,_,_) in points.keys()])))[::-1]
 
-        fig, axarr = plt.subplots(len(denvals),len(alphavals),sharex=True,sharey=True)
+        fig, axarr = plt.subplots(len(denvals),len(alphavals),sharex=True,sharey=True,figsize=(12,10))
 
         for i in range(len(denvals)):
             den = denvals[i]
             for j in range(len(alphavals)):
                 alpha = alphavals[j]
                 #
+                if i==0 and j==0: lins = []
                 for k in range(len(namevals)):
                     name = namevals[k]
                     mynnvals = [nn for nn in nnvals if (name,nn,alpha,den) in points.keys()]
@@ -56,10 +60,14 @@ if __name__ == '__main__':
                     dots = data+np.array(mynnvals)*1j
                     dots = np.array([(int(np.imag(x)),float(np.real(x))) for x in dots.flatten()])
                     mean = np.mean(data,axis=0)
-                    axarr[i,j].set_title("$D=%d$  $\\alpha=%d$"%(den,alpha))
+                    axarr[i,j].set_title("$P=%.3f$  $C=%.3f$"%(alpha,den))
                     if logx: axarr[i,j].set_xscale('log')
                     if logy: axarr[i,j].set_yscale('log')
                     axarr[i,j].plot(dots[:,0],dots[:,1],"o",color=colori(k,len(namevals)))
-                    axarr[i,j].plot(mynnvals,mean,'-',color=colori(k,len(namevals)))
+                    lin = axarr[i,j].plot(mynnvals,mean,'-',color=colori(k,len(namevals)))
+                    if i==0 and j==0: lins.append(lin[0])
+                if i==0 and j==0:
+                    siz = 90.0/len(namevals)
+                    fig.legend(lins,namevals,loc='lower center',ncol=len(namevals),prop={'size':siz})
 
-        fig.savefig(sys.argv[2])
+        fig.savefig(argis[2])

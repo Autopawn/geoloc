@@ -19,7 +19,7 @@ rm -rf solutions || true
 mkdir solutions
 
 
-poolsizes="1 4 16 64 256 1024"
+poolsizes="0001 0004 0016 0064 0256 1024"
 
 # Solve problems:
 
