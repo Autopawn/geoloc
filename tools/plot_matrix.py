@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 colors = ["red","black","green","blue"]
-figures = ["s","^","o","r"]
 
 if __name__ == '__main__':
     if len(sys.argv)<3:
@@ -53,7 +52,7 @@ if __name__ == '__main__':
                     axarr[i,j].set_title("$D=%d$  $\\alpha=%d$"%(den,alpha))
                     if logx: axarr[i,j].set_xscale('log')
                     if logy: axarr[i,j].set_yscale('log')
-                    axarr[i,j].plot(dots[:,0],dots[:,1],figures[k],color=colors[k])
-                    axarr[i,j].plot(mynnvals,mean,'-',color=colors[k])
+                    axarr[i,j].plot(dots[:,0],dots[:,1],"o",color=k/float(len(alphavals)))
+                    axarr[i,j].plot(mynnvals,mean,'-',color=k/float(len(alphavals)))
 
         fig.savefig(sys.argv[2])
