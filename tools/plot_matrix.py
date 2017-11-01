@@ -59,7 +59,7 @@ if __name__ == '__main__':
                     axarr[i,j].set_title("$D=%d$  $\\alpha=%d$"%(den,alpha))
                     if logx: axarr[i,j].set_xscale('log')
                     if logy: axarr[i,j].set_yscale('log')
-                    axarr[i,j].plot(dots[:,0],dots[:,1],"o",color=colori(k,float(len(alphavals))))
-                    axarr[i,j].plot(mynnvals,mean,'-',color=colori(k,float(len(alphavals))))
+                    axarr[i,j].plot(dots[:,0],dots[:,1],"o",color=colori(k,len(namevals)))
+                    axarr[i,j].plot(mynnvals,mean,'-',color=colori(k,len(namevals)))
 
         fig.savefig(sys.argv[2])
