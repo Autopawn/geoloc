@@ -1,5 +1,6 @@
 import sys
 import matplotlib
+import itertools
 
 # v So that doens't trow error through ssh.
 matplotlib.use('Agg')
@@ -55,16 +56,22 @@ if __name__ == '__main__':
                 for k in range(len(namevals)):
                     name = namevals[k]
                     mynnvals = [nn for nn in nnvals if (name,nn,alpha,den) in points.keys()]
-                    data = [points[(name,nn,alpha,den)] for nn in mynnvals]
-                    data = np.array(data).T
-                    dots = data+np.array(mynnvals)*1j
-                    dots = np.array([(int(np.imag(x)),float(np.real(x))) for x in dots.flatten()])
-                    mean = np.mean(data,axis=0)
+                    data = [(nn,points[(name,nn,alpha,den)]) for nn in mynnvals]
+
+                    mean = [(x[0],np.mean(x[1])) for x in data if len(x[1])>0]
+                    dots = [[(x[0],y) for y in x[1]] for x in data]
+                    dots = list(itertools.chain.from_iterable(dots))
+
+                    meanx = [dot[0] for dot in mean]
+                    meany = [dot[1] for dot in mean]
+                    dotsx = [dot[0] for dot in dots]
+                    dotsy = [dot[1] for dot in dots]
+
                     axarr[i,j].set_title("$P=%.3f$  $C=%.3f$"%(alpha,den))
                     if logx: axarr[i,j].set_xscale('log')
                     if logy: axarr[i,j].set_yscale('log')
-                    axarr[i,j].plot(dots[:,0],dots[:,1],"o",color=colori(k,len(namevals)))
-                    lin = axarr[i,j].plot(mynnvals,mean,'-',color=colori(k,len(namevals)))
+                    axarr[i,j].plot(dotsx,dotsy,"o",color=colori(k,len(namevals)),alpha=0.1)
+                    lin = axarr[i,j].plot(meanx,meany,'-',color=colori(k,len(namevals)))
                     if i==0 and j==0: lins.append(lin[0])
                 if i==0 and j==0:
                     siz = 90.0/len(namevals)
