@@ -67,6 +67,8 @@ if __name__ == '__main__':
                     dotsx = [dot[0] for dot in dots]
                     dotsy = [dot[1] for dot in dots]
 
+                    axarr[i,j].set_xlim(min(nnvals),max(nnvals))
+
                     axarr[i,j].set_title("$P=%.3f$  $C=%.3f$"%(alpha,den))
                     if logx: axarr[i,j].set_xscale('log')
                     if logy: axarr[i,j].set_yscale('log')

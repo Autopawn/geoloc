@@ -22,3 +22,7 @@ echo "" > collect/nfacs.txt
 grep -R . solutions/*/lp_nfacs.txt | sed -E "s/\w+\/([0-9]+)_([0-9\.]+)_([0-9\.]+)\/(\w|-|\.)+:([0-9\.]+)/lp \1 \2 \3 \5/" >> collect/nfacs.txt
 grep -R . solutions/*/gl_*_nfacs.txt | sed -E "s/\w+\/([0-9]+)_([0-9\.]+)_([0-9\.]+)\/(\w|-|\.)+_(\w+)_nfacs\.txt:([0-9\.]+)/gl_\5 \1 \2 \3 \6/" >> collect/nfacs.txt
 python ../../tools/plot_matrix.py -lx collect/nfacs.txt collect/nfacs.png
+
+# Create file for the proportions
+python ../../tools/portion_of_max.py lp collect/vals.txt collect/ports.txt
+python ../../tools/plot_matrix.py -lx collect/ports.txt collect/ports.png
