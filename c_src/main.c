@@ -23,7 +23,13 @@ int main(int argc, char **argv){
         exit(1);
     }
     printf("Pool size: %d\n",pool_size);
-    printf("Vision range: %d\n",vision_range);
+    if(pool_size==1){
+        vision_range=1;
+        printf("Vision range: %d\n",vision_range);
+        printf("\t (Greedy)\n");
+    }else{
+        printf("Vision range: %d\n",vision_range);
+    }
     printf("Max solutions to show: %d\n",max_to_show);
     // Load problem file:
     problem *prob = new_problem_load(input_file);

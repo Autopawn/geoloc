@@ -60,14 +60,9 @@ cd problems; for foldr in * ; do
         #### Get the geoloc solutions
         python ../../../tools/prob_translator.py "$file" geoloc ../solutions/"$file".gl
         for pz in $poolsizes ; do
-            if [ $pz -eq 1 ]; then
-                # greedy:
-                vrange=1
-            else
-                # not greedy
-                vrange=$(python -c "print(max(1,$capacity//(int(\"$pz\")*$nn)))")
-            fi
-
+            # Calculate range
+            vrange=$(python -c "print(max(1,$capacity//(int(\"$pz\")*$nn)))")
+            # Solve using geoloc
             ../../../geoloc.exe "$pz" "$vrange" 1 ../solutions/"$file".gl \
                 ../solutions/"$file"_gl_"$pz"_sol
             # Get number of facilities
