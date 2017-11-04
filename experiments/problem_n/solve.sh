@@ -18,8 +18,10 @@ fi
 rm -rf solutions || true
 mkdir solutions
 
+# Max computational capacity (nn*poolsize*visionrange):
+capacity=10000000
 
-poolsizes="0001 0004 0016 0064 0256 1024"
+poolsizes="0001 0004 0016 0064 0256 1024 4096"
 
 # Solve problems:
 
@@ -58,10 +60,14 @@ cd problems; for foldr in * ; do
         python ../../../tools/prob_translator.py "$file" geoloc ../solutions/"$file".gl
         for pz in $poolsizes ; do
             if [ $pz -eq 1 ]; then
+                # greedy:
                 vrange=1
             else
-                vrange=10000000
+                # not greedy
+                nn=$(cat "$file" | grep "c " | wc -l)
+                vrange=$(python -c "print(min(1,$capacity//(int(\"$pz\")*$nn)))")
             fi
+
             ../../../geoloc.exe "$pz" "$vrange" 1 ../solutions/"$file".gl \
                 ../solutions/"$file"_gl_"$pz"_sol
             # Get number of facilities
