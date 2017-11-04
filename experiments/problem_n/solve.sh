@@ -65,7 +65,7 @@ cd problems; for foldr in * ; do
                 vrange=1
             else
                 # not greedy
-                vrange=$(python -c "print(min(1,$capacity//(int(\"$pz\")*$nn)))")
+                vrange=$(python -c "print(max(1,$capacity//(int(\"$pz\")*$nn)))")
             fi
 
             ../../../geoloc.exe "$pz" "$vrange" 1 ../solutions/"$file".gl \
