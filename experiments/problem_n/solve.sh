@@ -37,6 +37,7 @@ cd problems; for foldr in * ; do
     done
     #
     for file in "$foldr"/* ; do (
+        nn=$(cat "$file" | grep "c " | wc -l)
         #### Get the optimal solution:
         python ../../../tools/prob_translator.py "$file" lpsolve ../solutions/"$file".lp
         { time -p $lp_solve ../solutions/"$file".lp > ../solutions/"$file"_lp_sol; }\
@@ -64,7 +65,6 @@ cd problems; for foldr in * ; do
                 vrange=1
             else
                 # not greedy
-                nn=$(cat "$file" | grep "c " | wc -l)
                 vrange=$(python -c "print(min(1,$capacity//(int(\"$pz\")*$nn)))")
             fi
 
