@@ -1,10 +1,8 @@
-
-# NOTE: I AM WORKING ON THIS!
-
 #!/bin/bash -e
 #PBS -o result.out -e result.err
 #PBS -l cput=8000:00:01
 #PBS -l walltime=8000:00:01
+#PBS mem=30gb
 
 # Tunning for the HPC cluster:
 if [ -n "${PBS_O_WORKDIR+1}" ]; then
