@@ -19,6 +19,7 @@ mkdir solutions
 # Max computational capacity (nn*poolsize*visionrange):
 capacity=10000000
 
+#poolsizes="0001 0004 0016"
 poolsizes="0001 0004 0016 0064 0256 1024 4096"
 
 # Solve problems:
@@ -35,6 +36,7 @@ cd problems; for foldr in * ; do
     done
     #
     for file in "$foldr"/* ; do (
+        bfname=$(basename "$file")
         nn=$(cat "$file" | grep "c " | wc -l)
         #### Get the optimal solution:
         python ../../../tools/prob_translator.py "$file" lpsolve ../solutions/"$file".lp
@@ -42,14 +44,17 @@ cd problems; for foldr in * ; do
             2> ../solutions/"$file"_lp_times
         rm ../solutions/"$file".lp
         # Get number of facilities
-        cat ../solutions/"$file"_lp_sol | grep "X" | grep " 1" | wc -l \
+        cat ../solutions/"$file"_lp_sol | grep "X" | grep " 1" | wc -l | \
+            sed -e "s/$/ $bfname/" \
             >> ../solutions/"$foldr"/lp_nfacs.txt
         # Get value of objective function
         cat ../solutions/"$file"_lp_sol | grep "objective function:" | \
-            awk '{print $NF}' | cut -d'.' -f1 >> ../solutions/"$foldr"/lp_vals.txt
+            awk '{print $NF}' | cut -d'.' -f1 | sed -e "s/$/ $bfname/" \
+            >> ../solutions/"$foldr"/lp_vals.txt
         # Get time
         cat ../solutions/"$file"_lp_times | grep "user" | \
-            awk '{print $NF}' >> ../solutions/"$foldr"/lp_times.txt
+            awk '{print $NF}' | sed -e "s/$/ $bfname/" \
+            >> ../solutions/"$foldr"/lp_times.txt
         # Delete solution to save space on the HPC cluster:
         if [ -n "${PBS_O_WORKDIR+1}" ]; then
             rm ../solutions/"$file"_lp_sol
@@ -65,20 +70,23 @@ cd problems; for foldr in * ; do
                 ../solutions/"$file"_gl_"$pz"_sol
             # Get number of facilities
             cat ../solutions/"$file"_gl_"$pz"_sol | grep "Facilities:" | \
-                awk '{print $NF}' >> ../solutions/"$foldr"/gl_"$pz"_nfacs.txt
+                awk '{print $NF}' | sed -e "s/$/ $bfname/" \
+                >> ../solutions/"$foldr"/gl_"$pz"_nfacs.txt
             # Get value of objective function
             cat ../solutions/"$file"_gl_"$pz"_sol | grep "Value:" | \
-                awk '{print $NF}' >> ../solutions/"$foldr"/gl_"$pz"_vals.txt
+                awk '{print $NF}' | sed -e "s/$/ $bfname/" \
+                >> ../solutions/"$foldr"/gl_"$pz"_vals.txt
             # Get time
             cat ../solutions/"$file"_gl_"$pz"_sol | grep "Time:" | \
-                awk '{print $NF}' >> ../solutions/"$foldr"/gl_"$pz"_times.txt
+                awk '{print $NF}' | sed -e "s/$/ $bfname/" \
+                >> ../solutions/"$foldr"/gl_"$pz"_times.txt
             # Delete solution
             if [ -n "${PBS_O_WORKDIR+1}" ]; then
                 rm ../solutions/"$file"_gl_"$pz"_sol
             fi
+        ) &
         done
+        wait
         rm ../solutions/"$file".gl
-    ) &
     done
-    wait
 done

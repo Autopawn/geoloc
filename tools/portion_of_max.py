@@ -16,31 +16,28 @@ if __name__ == '__main__':
             if lin=="": continue
             strp = lin.split(' ')
             #
-            key = ' '.join(strp[1:-1])
+            key = ' '.join(strp[1:-2])
             #
             if key not in results:
                 results[key] = []
-            results[key].append((strp[0],float(strp[-1])))
+            results[key].append(((strp[0],strp[-1]),float(strp[-2])))
         #
         fil.close()
         #
+        finals = []
         for key in results:
-            liste = results[key][:]
-            means = []
-            while len(liste)>0:
-                name = liste[0][0]
-                mean = np.mean([x[1] for x in liste if x[0]==name])
-                liste = [x for x in liste if x[0]!=name]
-                means.append((name,mean))
-            #
-            results[key] = means
+            liste = dict(results[key][:])
+            for (name,prob) in liste:
+                if (maxname,prob) in liste:
+                    if liste[(maxname,prob)]==0.0:
+                        portion = 1.0
+                    else:
+                        portion = liste[(name,prob)]/liste[(maxname,prob)]
+                    assert(name!=maxname or portion==1.0)
+                    if name!=maxname: finals.append((name,key,portion,prob))
         #
         filo = open(outfile,'w')
-        for key in results:
-            ndic = dict(results[key])
-            if maxname in ndic:
-                maxval = ndic[maxname]
-                for name in ndic:
-                    filo.write("%s %s %.8f\n"%(name,key,ndic[name]/maxval))
+        for vals in finals:
+            filo.write("%s %s %.8f %s\n"%vals)
         #
         filo.close()

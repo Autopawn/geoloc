@@ -33,7 +33,7 @@ if __name__ == '__main__':
         for li in inputf:
             li = li.strip()
             if li=="": continue
-            name,nn,alpha,density,yvalue = li.split()
+            name,nn,alpha,density,yvalue,_ = li.split()
             key = (name,int(nn),float(alpha),float(density))
             if key not in points:
                 points[key] = []
@@ -76,7 +76,7 @@ if __name__ == '__main__':
                     lin = axarr[i,j].plot(meanx,meany,'-',color=colori(k,len(namevals)))
                     if i==0 and j==0: lins.append(lin[0])
                 if i==0 and j==0:
-                    siz = 90.0/len(namevals)
+                    siz = 90.0/(len(namevals)+1)
                     fig.legend(lins,namevals,loc='lower center',ncol=len(namevals),prop={'size':siz})
 
         fig.savefig(argis[2])
