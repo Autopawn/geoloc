@@ -16,13 +16,7 @@ fi
 rm -rf solutions || true
 mkdir solutions
 
-# Max computational capacity (nn*poolsize*visionrange):
-capacity=10000000
-
-#poolsizes="0001 0004 0016"
-poolsizes="0001 0004 0016 0064 0256 1024 4096"
-
-# Solve problems:
+poolsizes="010 020 030 040 050 060 070 080 090 100 110 120 130 140 150 160 170 180 190 200 210 220 230 240 250 260 270 280 290 300 310 320 330 340 350 360 370 380 390 400 410 420 430 440 450 460 470 480 490 500"
 
 cd problems; for foldr in * ; do
     mkdir -p ../solutions/"$foldr"
@@ -64,7 +58,7 @@ cd problems; for foldr in * ; do
         python ../../../tools/prob_translator.py "$file" geoloc ../solutions/"$file".gl
         for pz in $poolsizes ; do
             # Calculate range
-            vrange=$(python -c "print(max(1,$capacity//(int(\"$pz\")*$nn)))")
+            vrange=$(python -c "print(int(\"$pz\")*$nn)")
             # Solve using geoloc
             ../../../geoloc.exe "$pz" "$vrange" 1 ../solutions/"$file".gl \
                 ../solutions/"$file"_gl_"$pz"_sol
@@ -82,9 +76,9 @@ cd problems; for foldr in * ; do
                 >> ../solutions/"$foldr"/gl_"$pz"_times.txt
             # Delete solution
             rm ../solutions/"$file"_gl_"$pz"_sol
-        ) &
         done
-        wait
         rm ../solutions/"$file".gl
+    ) &
     done
+    wait
 done

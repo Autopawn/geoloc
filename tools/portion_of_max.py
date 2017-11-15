@@ -11,33 +11,38 @@ if __name__ == '__main__':
         #
         fil = open(infile)
         results = {}
-        for lin in fil:
-            lin = lin.strip()
-            if lin=="": continue
-            strp = lin.split(' ')
+        for li in fil:
+            li = li.strip()
+            if li=="": continue
+            li = li.split(' ')
             #
-            key = ' '.join(strp[1:-2])
-            #
-            if key not in results:
-                results[key] = []
-            results[key].append(((strp[0],strp[-1]),float(strp[-2])))
+            name = li[0]
+            pname = li[-1]
+            xx = 'c' if li[1]=='c' else float(li[1])
+            yy = float(li[-2])
+            dim = [float(i) if '.' in i else int(i) for i in li[2:-2]]
+            key = tuple([name,pname]+dim+[xx])
+            assert(key not in results)
+            results[key]= yy
         #
         fil.close()
         #
-        finals = []
-        for key in results:
-            liste = dict(results[key][:])
-            for (name,prob) in liste:
-                if (maxname,prob) in liste:
-                    if liste[(maxname,prob)]==0.0:
-                        portion = 1.0
-                    else:
-                        portion = liste[(name,prob)]/liste[(maxname,prob)]
-                    assert(name!=maxname or portion==1.0)
-                    if name!=maxname: finals.append((name,key,portion,prob))
-        #
         filo = open(outfile,'w')
-        for vals in finals:
-            filo.write("%s %s %.8f %s\n"%vals)
+        for key in results:
+            maxkey = tuple([maxname]+list(key[1:]))
+            if maxkey not in results:
+                maxkey = tuple(list(maxkey[:-1])+['c'])
+            assert(maxkey in results)
+            if results[maxkey]==0.0:
+                assert(results[key]==0.0)
+                portion = 1.0
+            else:
+                portion = results[key]/results[maxkey]
+            assert(name!=maxname or portion==1.0)
+            filo.write("%s "%key[0])
+            filo.write("%s "%str(key[-1]))
+            [filo.write("%s "%str(v)) for v in key[2:-1]]
+            filo.write("%f "%portion)
+            filo.write("%s\n"%key[1])
         #
         filo.close()

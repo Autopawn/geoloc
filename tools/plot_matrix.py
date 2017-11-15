@@ -9,23 +9,24 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def colori(kk,nn):
-    if kk==0: return (0,0,0)
-    if kk==nn-1: return (1.0,0,0)
+    if kk==0: return (1.0,0,0)
+    if kk==nn-1: return (0,0,0)
     if kk==1 and nn==3: return (0,0,1.0)
     flt = (kk-1.0)/(nn-3.0)
     return (0,1-flt,flt)
-
-
 
 if __name__ == '__main__':
     argis = []
     for arg in sys.argv:
         if arg[0]!='-': argis.append(arg)
-    if len(argis)<3:
-        print("Usage: %s [-lx] [-ly] <summary_file> <output>"%argis[0])
+    if len(argis)<4 or len(argis)>6:
+        print("Usage: %s [-lx] [-ly] [-sx] [-sy] <summary_file> <output> <title> [<var_1>] [<var_2>]"%argis[0])
     else:
+        dims = len(argis)-4
         logx = "-lx" in sys.argv
         logy = "-ly" in sys.argv
+        sharex = "-sx" in sys.argv
+        sharey = "-sy" in sys.argv
 
         points = {}
         #
@@ -33,50 +34,89 @@ if __name__ == '__main__':
         for li in inputf:
             li = li.strip()
             if li=="": continue
-            name,nn,alpha,density,yvalue,_ = li.split()
-            key = (name,int(nn),float(alpha),float(density))
+            li = li.split()
+            if len(li)!=dims+4:
+                raise ValueError("Invalid line!")
+            name = li[0]
+            xx = 'c' if li[1]=='c' else float(li[1])
+            yy = float(li[-2])
+            dim = [float(i) if '.' in i else int(i) for i in li[2:-2]]
+            key = tuple([name,xx]+dim)
             if key not in points:
                 points[key] = []
-            points[key].append(float(yvalue))
+            points[key].append(yy)
         inputf.close()
-        # Find the alpha values:
-        alphavals = sorted(list(set([a for (_,_,a,_) in points.keys()])))
-        denvals = sorted(list(set([d for (_,_,_,d) in points.keys()])))
-        nnvals = sorted(list(set([nn for (_,nn,_,_) in points.keys()])))
-        namevals = sorted(list(set([nam for (nam,_,_,_) in points.keys()])))[::-1]
+        # Find the values for each dimension:
+        namevals = sorted(list(set([k[0] for k in points])))
+        xxvals = sorted(list(set([k[1] for k in points if k[1]!='c'])))
+        dimvals = [sorted(list(set([k[2+i] for k in points]))) for i in range(dims)]
 
-        fig, axarr = plt.subplots(len(denvals),len(alphavals),sharex=True,sharey=True,figsize=(12,10))
+        yplots = 1 if dims<1 else len(dimvals[0])
+        xplots = 1 if dims<2 else len(dimvals[1])
 
-        for i in range(len(denvals)):
-            den = denvals[i]
-            for j in range(len(alphavals)):
-                alpha = alphavals[j]
+        fig, axarr = plt.subplots(yplots,xplots,sharex=sharex,sharey=sharey,figsize=(12,10))
+        fig.suptitle(argis[3], fontsize=18)
+
+        dimnames = argis[4:]
+        assert(len(dimnames)==dims)
+
+        for i in range(yplots):
+            if dims>=1: yaxisval = dimvals[0][i]
+            #
+            for j in range(xplots):
+                if dims>=2: xaxisval = dimvals[1][j]
                 #
+                if dims==2: keypart = [yaxisval,xaxisval]
+                elif dims==1: keypart = [yaxisval]
+                else: keypart = []
+
+                #
+                xxmin = min(xxvals)
+                xxmax = max(xxvals)
+                if dims==2: subaxxarr = axarr[i,j]
+                elif dims==1: subaxxarr = axarr[i]
+                else: subaxxarr = axarr[0]
+
+                subaxxarr.set_xlim((xxmin,xxmax))
+                title = ""
+                if dims>=1: title+= "%s = $%s$"%(dimnames[0],str(yaxisval))
+                if dims>=2: title+= ", %s = $%s$"%(dimnames[1],str(xaxisval))
+                if title!= "": subaxxarr.set_title(title)
+
+                if logx: subaxxarr.set_xscale('log')
+                if logy: subaxxarr.set_yscale('log')
+
                 if i==0 and j==0: lins = []
                 for k in range(len(namevals)):
                     name = namevals[k]
-                    mynnvals = [nn for nn in nnvals if (name,nn,alpha,den) in points.keys()]
-                    data = [(nn,points[(name,nn,alpha,den)]) for nn in mynnvals]
 
-                    mean = [(x[0],np.mean(x[1])) for x in data if len(x[1])>0]
-                    dots = [[(x[0],y) for y in x[1]] for x in data]
-                    dots = list(itertools.chain.from_iterable(dots))
+                    keytup = lambda xxxx : tuple([name,xxxx]+keypart)
+                    myxxvals = [xx for xx in xxvals+['c'] if keytup(xx) in points]
+                    assert(all([xx=='c' for xx in myxxvals]) or 'c' not in myxxvals)
 
-                    meanx = [dot[0] for dot in mean]
-                    meany = [dot[1] for dot in mean]
-                    dotsx = [dot[0] for dot in dots]
-                    dotsy = [dot[1] for dot in dots]
+                    if 'c' in myxxvals:
+                        pointsyy = points[keytup('c')]
+                        for yy in pointsyy:
+                            subaxxarr.plot([xxmin,xxmax],[yy,yy],"-",color=colori(k,len(namevals)),alpha=0.1)
+                        yymean = np.mean(pointsyy)
+                        lin = subaxxarr.plot([xxmin,xxmax],[yymean,yymean],'-',color=colori(k,len(namevals)))
+                    else:
+                        data = [(xx,points[keytup(xx)]) for xx in myxxvals]
+                        #
+                        mean = [(p[0],np.mean(p[1])) for p in data if len(p[1])>0]
+                        dots = [[(p[0],y) for y in p[1]] for p in data]
+                        dots = list(itertools.chain.from_iterable(dots))
+                        #
+                        meanx = [dot[0] for dot in mean]
+                        meany = [dot[1] for dot in mean]
+                        dotsx = [dot[0] for dot in dots]
+                        dotsy = [dot[1] for dot in dots]
 
-                    axarr[i,j].set_xlim(min(nnvals),max(nnvals))
-
-                    axarr[i,j].set_title("$P=%.3f$  $C=%.3f$"%(alpha,den))
-                    if logx: axarr[i,j].set_xscale('log')
-                    if logy: axarr[i,j].set_yscale('log')
-                    axarr[i,j].plot(dotsx,dotsy,"o",color=colori(k,len(namevals)),alpha=0.1)
-                    lin = axarr[i,j].plot(meanx,meany,'-',color=colori(k,len(namevals)))
+                        subaxxarr.plot(dotsx,dotsy,"o",color=colori(k,len(namevals)),alpha=0.1)
+                        lin = subaxxarr.plot(meanx,meany,'-',color=colori(k,len(namevals)))
                     if i==0 and j==0: lins.append(lin[0])
                 if i==0 and j==0:
-                    siz = 90.0/(len(namevals)+1)
+                    siz = 18.0
                     fig.legend(lins,namevals,loc='lower center',ncol=len(namevals),prop={'size':siz})
 
         fig.savefig(argis[2])

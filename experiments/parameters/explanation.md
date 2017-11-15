@@ -55,7 +55,7 @@ The parameters are calculated as:
 | $N$         | $N$     |
 | $\beta$     | $1$ |
 | $\alpha$    | $\sqrt{\frac{3L^2 \beta^2 P}{\pi}}$ |
-| $\gamma$    | $\frac{\pi N}{3L^2} \frac{\alpha^3}{\beta^2}$ |
+| $\gamma$    | $C \alpha N P$ |
 
 # Conclusions
 
