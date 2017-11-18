@@ -2,7 +2,6 @@
 #PBS -o result.out -e result.err
 #PBS -l cput=8000:00:01
 #PBS -l walltime=8000:00:01
-#PBS mem=30gb
 
 # Tunning for the HPC cluster:
 if [ -n "${PBS_O_WORKDIR+1}" ]; then
@@ -16,25 +15,18 @@ fi
 rm -rf solutions || true
 mkdir solutions
 
-poolsizes="001 020 040 060 080 100 120 140 160 180 200 220 240 260 280 300"
+# Solve problems:
 
 cd problems; for foldr in * ; do
     mkdir -p ../solutions/"$foldr"
     touch ../solutions/"$foldr"/lp_nfacs.txt
     touch ../solutions/"$foldr"/lp_vals.txt
     touch ../solutions/"$foldr"/lp_times.txt
-    for pz in $poolsizes ; do
-        touch ../solutions/"$foldr"/gl_"$pz"_nfacs.txt
-        touch ../solutions/"$foldr"/gl_"$pz"_vals.txt
-        touch ../solutions/"$foldr"/gl_"$pz"_times.txt
-    done
-    #
     for file in "$foldr"/* ; do (
         bfname=$(basename "$file")
-        nn=$(cat "$file" | grep "c " | wc -l)
         #### Get the optimal solution:
         python ../../../tools/prob_translator.py "$file" lpsolve ../solutions/"$file".lp
-        { time -p $lp_solve ../solutions/"$file".lp > ../solutions/"$file"_lp_sol; }\
+        { time -p $lp_solve ../solutions/"$file".lp > ../solutions/"$file"_lp_sol; } \
             2> ../solutions/"$file"_lp_times
         rm ../solutions/"$file".lp
         # Get number of facilities
@@ -52,30 +44,26 @@ cd problems; for foldr in * ; do
         # Delete solution:
         rm ../solutions/"$file"_lp_sol
         rm ../solutions/"$file"_lp_times
-        #### Get the geoloc solutions
+        #
+        #### Get the greedy solution:
         python ../../../tools/prob_translator.py "$file" geoloc ../solutions/"$file".gl
-        for pz in $poolsizes ; do
-            # Calculate range
-            vrange=$(python -c "print(int(\"$pz\")*$nn)")
-            # Solve using geoloc
-            ../../../geoloc.exe "$pz" "$vrange" 1 ../solutions/"$file".gl \
-                ../solutions/"$file"_gl_"$pz"_sol
-            # Get number of facilities
-            cat ../solutions/"$file"_gl_"$pz"_sol | grep "Facilities:" | \
-                awk '{print $NF}' | sed -e "s/$/ $bfname/" \
-                >> ../solutions/"$foldr"/gl_"$pz"_nfacs.txt
-            # Get value of objective function
-            cat ../solutions/"$file"_gl_"$pz"_sol | grep "Value:" | \
-                awk '{print $NF}' | sed -e "s/$/ $bfname/" \
-                >> ../solutions/"$foldr"/gl_"$pz"_vals.txt
-            # Get time
-            cat ../solutions/"$file"_gl_"$pz"_sol | grep "Time:" | \
-                awk '{print $NF}' | sed -e "s/$/ $bfname/" \
-                >> ../solutions/"$foldr"/gl_"$pz"_times.txt
-            # Delete solution
-            rm ../solutions/"$file"_gl_"$pz"_sol
-        done
+        ../../../geoloc.exe 1 1 1 ../solutions/"$file".gl \
+            ../solutions/"$file"_greedy_sol
         rm ../solutions/"$file".gl
+        # Get number of facilities
+        cat ../solutions/"$file"_greedy_sol | grep "Facilities:" | \
+            awk '{print $NF}' | sed -e "s/$/ $bfname/" \
+            >> ../solutions/"$foldr"/greedy_nfacs.txt
+        # Get value of objective function
+        cat ../solutions/"$file"_greedy_sol | grep "Value:" | \
+            awk '{print $NF}' | sed -e "s/$/ $bfname/" \
+            >> ../solutions/"$foldr"/greedy_vals.txt
+        # Get time
+        cat ../solutions/"$file"_greedy_sol | grep "Time:" | \
+            awk '{print $NF}' | sed -e "s/$/ $bfname/" \
+            >> ../solutions/"$foldr"/greedy_times.txt
+        # Delete solution:
+        rm ../solutions/"$file"_greedy_sol
     ) &
     done
     wait
