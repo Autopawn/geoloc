@@ -6,9 +6,10 @@ rm -rf solutions || true
 mkdir problems
 
 
-ncases=32
-nntests="25 50 100"
+ncases=20
+nntests="025 050 100"
 
+# NOTE: Remember to change this in collect.sh too
 pptests=0.050
 cctests=0.500
 
