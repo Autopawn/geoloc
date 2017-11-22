@@ -4,8 +4,8 @@ rm -rf collect || true
 mkdir -p collect
 
 # NOTE: Remember to change this in generate.sh too
-pptests=0.050
-cctests=0.500
+pptests=0.15
+cctests=0.50
 
 parameters='($P='"$pptests"', C='"$cctests"'$)'
 

@@ -54,7 +54,7 @@ if __name__ == '__main__':
         yplots = 1 if dims<1 else len(dimvals[0])
         xplots = 1 if dims<2 else len(dimvals[1])
 
-        fig, axarr = plt.subplots(yplots,xplots,sharex=sharex,sharey=sharey,figsize=(12,10))
+        fig, axarr = plt.subplots(yplots,xplots,sharex=sharex,sharey=sharey,figsize=(14,10))
         fig.suptitle(argis[3], fontsize=18)
 
         dimnames = argis[4:]
@@ -77,6 +77,7 @@ if __name__ == '__main__':
                 elif dims==1: subaxxarr = axarr[i]
                 else: subaxxarr = axarr[0]
 
+                #
                 subaxxarr.set_xlim((xxmin,xxmax))
                 title = ""
                 if dims>=1: title+= "%s = $%s$"%(dimnames[0],str(yaxisval))

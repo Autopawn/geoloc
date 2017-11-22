@@ -10,8 +10,8 @@ ncases=20
 nntests="025 050 100"
 
 # NOTE: Remember to change this in collect.sh too
-pptests=0.050
-cctests=0.500
+pptests=0.15
+cctests=0.50
 
 # Generate problems:
 for nn in $nntests; do

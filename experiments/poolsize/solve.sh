@@ -1,4 +1,5 @@
 #!/bin/bash -e
+#PBS -N poolsize
 #PBS -o result.out -e result.err
 #PBS -l cput=8000:00:01
 #PBS -l walltime=8000:00:01
