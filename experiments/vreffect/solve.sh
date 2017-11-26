@@ -37,7 +37,7 @@ cd problems; for foldr in * ; do
         done
     done
     #
-    for tt in $(seq 1 $tiers); do
+    for tt in $(seq 1 $ntiers); do
         for file in "$foldr"/prob_"$tt"_* ; do (
             bfname=$(basename "$file")
             nn=$(cat "$file" | grep "c " | wc -l)

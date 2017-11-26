@@ -34,7 +34,7 @@ cd problems; for foldr in * ; do
         touch ../solutions/"$foldr"/gl_"$pz"_times.txt
     done
     #
-    for tt in $(seq 1 $tiers); do
+    for tt in $(seq 1 $ntiers); do
         for file in "$foldr"/prob_"$tt"_* ; do (
             bfname=$(basename "$file")
             nn=$(cat "$file" | grep "c " | wc -l)
