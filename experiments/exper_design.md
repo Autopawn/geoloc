@@ -64,7 +64,7 @@ The experimental design covers the following tests, the first two are to underst
 
 4. **vreffect:** the purposes of this experiments are to find an optimal relation between $PZ$ and $VR$ for different values of $N$, and if possible, relate this variables to memory capacity $CP = N \cdot PZ \cdot VR$. For this purpose the quality of the `geoloc` solutions will be plotted against the $VR$ for different values of $PZ$ for different values of $N$. The idea is to find one or more *strategies* to choose $PZ$ and $VR$ (considerating $CP$) to solve a general problem.
 
-5. **extrapolation**: similar experiments than in the **identify** step will be run but now testing different *strategies* obtained in the previous step to see how they behave against different problems
+5. **extension**: similar experiments than in the **identify** step will be run but now testing different *strategies* obtained in the previous step to see how they behave against different problems
 
 6. **setcovering**: test the *strategies* but now with the problem without gradual decay of the gain due to transport cost, this problem is less *integer-friendly* as its more like a *set-covering*, so the solution with linear programming takes longer.
 
@@ -78,18 +78,38 @@ Each experiment has 3 scripts, `generate.sh` that generates the problems, `solve
 
 Each experiment was run for 40 randomly generated test cases, the *means* are displayed as a curve.
 
-![](results/identify20171122/nfacs.png)
+![](zzzresults/identify20171122/nfacs.png)
 
 From this graph we can see that specific choices of parameters $P$ and $C$ keep the number of facilities of the optimal solution constant as $N$ gets bigger, so keeping this parameters constant we can say that $N$ is the parameter of complexity.
 
-![](results/identify20171122/props.png)
+![](zzzresults/identify20171122/props.png)
 
 We can see that the major differences between the solution obtained with the *greedy* algorithm and the optimal solution happen for larger values of $P$, $P \approx 0.2$ and values of $C$ around $0.5$, this happens when the number of facilities is between $3$ and $5$.
 
 Since the algorithm is well suited for problems where the number of facilities on the optimal solution is big but it would we worth to use it on problems where *greedy* doesn't perform very well, we will focus on problems with $C=0.5$ and $P=0.15$, where we can expect $4$ or $5$ facilities on the optimal solution.
 
-![](results/identify20171122/times.png)
+![](zzzresults/identify20171122/times.png)
 
 From this graph we can see that the execution times for $N=300$ can be up to 10 times larger than for small values of $P$ (with there are less facilities on the optimal solution than when there are many), this difference however is not very significant but is another reason to use the algorithm for this particular set of problems.
 
-## Poolsize
+## Extension
+
+As the results of **vreffect** weren't very conclusive, the following strategies to assign a value to $PZ$ and $VR$ will be tested:
+
+| Parameter | Values |
+| :-------- | :---: |
+| $PZ$      | $\{1,\sqrt{N},N\}$ |
+| $VR$      | $\{1,N,PZ,\sqrt{N \times PZ},PZ \times \sqrt{N}, \sqrt{PZ} \times N \}$ |
+
+Which are equivalent to the following strategies:
+
+| Strategy | $PZ$ | $VR$  |
+| :--------   | :---: | :---: |
+| greedy      | 1 | 1 |
+| gl-n1o2-1    | $\sqrt{N}$  | 1 |
+| gl-n1o2-n    | $\sqrt{N}$  | $N$ |
+| gl-n1o2-n3o2 | $\sqrt{N}$  | $N^{3/2}$ |
+| gl-n-1       | $N$  | 1 |
+| gl-n-n1o2    | $N$  | $\sqrt{N}$ |
+| gl-n-n3o4   | $N$  | $N^{3/4}$ |
+| gl-n-n      | $N$  | $N$ |

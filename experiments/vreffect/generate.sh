@@ -1,4 +1,4 @@
-#!/bin/bash -xe
+#!/bin/bash -e
 
 rm -rf problems || true
 rm -rf solutions || true
@@ -8,7 +8,7 @@ mkdir problems
 nntests="050 100 150 200"
 
 # NOTE: Remember to change this in solve.sh too
-ncases=10
+ncases=20
 ntiers=10
 
 # NOTE: Remember to change this in collect.sh too
@@ -25,7 +25,7 @@ for nn in $nntests; do
             ll="10000"
             beta="1"
             alpha=$(python -c "print(int(round((3.0*$ll**2.0*$beta**2.0*$pp/3.14159265359)**0.5)))")
-            gamma=$(python -c "print(int(round($cc*$alpha*$nn*$pp)))")
+            gamma=$(python -c "print(int(round($cc*$alpha*int(\"$nn\")*$pp)))")
             for tt in $(seq 1 $tiers); do
                 for kk in $(seq 1 $ncases); do
                     pname="$fname"/prob_"$tt"_"$kk"

@@ -1,5 +1,5 @@
 #!/bin/bash -e
-#PBS -N poolsize
+#PBS -N vreffect
 #PBS -o result.out -e result.err
 #PBS -l cput=8000:00:01
 #PBS -l walltime=8000:00:01
@@ -14,14 +14,15 @@ else
     export lp_solve="lp_solve"
 fi
 
-# NOTE: Remember to change this in generate.sh too
-ncases=10
+# NOTE: Remember to change this in solve.sh too
+ncases=20
 ntiers=10
 
 rm -rf solutions || true
 mkdir solutions
 
-poolsizes='001 010 020 030 040 050 060 070 080 090 100 110 120 130 140 150 160 170 180 190 200'
+poolsizes="050 100 150 200"
+vranges='0100 0200 0300 0400 0500 0600 0700 0800 0900 1000 1100 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500 2600 2700 2800 2900 3000'
 
 cd problems; for foldr in * ; do
     mkdir -p ../solutions/"$foldr"
@@ -29,9 +30,11 @@ cd problems; for foldr in * ; do
     touch ../solutions/"$foldr"/lp_vals.txt
     touch ../solutions/"$foldr"/lp_times.txt
     for pz in $poolsizes ; do
-        touch ../solutions/"$foldr"/gl_"$pz"_nfacs.txt
-        touch ../solutions/"$foldr"/gl_"$pz"_vals.txt
-        touch ../solutions/"$foldr"/gl_"$pz"_times.txt
+        for vr in $vranges ; do
+            touch ../solutions/"$foldr"/gl_"$pz"_"$vr"_nfacs.txt
+            touch ../solutions/"$foldr"/gl_"$pz"_"$vr"_vals.txt
+            touch ../solutions/"$foldr"/gl_"$pz"_"$vr"_times.txt
+        done
     done
     #
     for tt in $(seq 1 $tiers); do
@@ -58,28 +61,49 @@ cd problems; for foldr in * ; do
             # Delete solution:
             rm ../solutions/"$file"_lp_sol
             rm ../solutions/"$file"_lp_times
+
             #### Get the geoloc solutions
             python ../../../tools/prob_translator.py "$file" geoloc ../solutions/"$file".gl
             for pz in $poolsizes ; do
-                # Calculate range
-                vrange=$(python -c "print(int(\"$pz\")*$nn)")
+                #### Get the solution with full VR
                 # Solve using geoloc
-                ../../../geoloc.exe "$pz" "$vrange" 1 ../solutions/"$file".gl \
-                    ../solutions/"$file"_gl_"$pz"_sol
+                fullvr=$(python -c "print(int(\"$pz\")*$nn)")
+                ../../../geoloc.exe "$pz" "$fullvr" 1 ../solutions/"$file".gl \
+                    ../solutions/"$file"_fullVR_"$pz"_sol
                 # Get number of facilities
-                cat ../solutions/"$file"_gl_"$pz"_sol | grep "Facilities:" | \
+                cat ../solutions/"$file"_fullVR_"$pz"_sol | grep "Facilities:" | \
                     awk '{print $NF}' | sed -e "s/$/ $bfname/" \
-                    >> ../solutions/"$foldr"/gl_"$pz"_nfacs.txt
+                    >> ../solutions/"$foldr"/fullVR_"$pz"_nfacs.txt
                 # Get value of objective function
-                cat ../solutions/"$file"_gl_"$pz"_sol | grep "Value:" | \
+                cat ../solutions/"$file"_fullVR_"$pz"_sol | grep "Value:" | \
                     awk '{print $NF}' | sed -e "s/$/ $bfname/" \
-                    >> ../solutions/"$foldr"/gl_"$pz"_vals.txt
+                    >> ../solutions/"$foldr"/fullVR_"$pz"_vals.txt
                 # Get time
-                cat ../solutions/"$file"_gl_"$pz"_sol | grep "Time:" | \
+                cat ../solutions/"$file"_fullVR_"$pz"_sol | grep "Time:" | \
                     awk '{print $NF}' | sed -e "s/$/ $bfname/" \
-                    >> ../solutions/"$foldr"/gl_"$pz"_times.txt
+                    >> ../solutions/"$foldr"/fullVR_"$pz"_times.txt
                 # Delete solution
-                rm ../solutions/"$file"_gl_"$pz"_sol
+                rm ../solutions/"$file"_fullVR_"$pz"_sol
+
+                for vr in $vranges ; do
+                    # Solve using geoloc
+                    ../../../geoloc.exe "$pz" "$vr" 1 ../solutions/"$file".gl \
+                        ../solutions/"$file"_gl_"$pz"_"$vr"_sol
+                    # Get number of facilities
+                    cat ../solutions/"$file"_gl_"$pz"_"$vr"_sol | grep "Facilities:" | \
+                        awk '{print $NF}' | sed -e "s/$/ $bfname/" \
+                        >> ../solutions/"$foldr"/gl_"$pz"_"$vr"_nfacs.txt
+                    # Get value of objective function
+                    cat ../solutions/"$file"_gl_"$pz"_"$vr"_sol | grep "Value:" | \
+                        awk '{print $NF}' | sed -e "s/$/ $bfname/" \
+                        >> ../solutions/"$foldr"/gl_"$pz"_"$vr"_vals.txt
+                    # Get time
+                    cat ../solutions/"$file"_gl_"$pz"_"$vr"_sol | grep "Time:" | \
+                        awk '{print $NF}' | sed -e "s/$/ $bfname/" \
+                        >> ../solutions/"$foldr"/gl_"$pz"_"$vr"_times.txt
+                    # Delete solution
+                    rm ../solutions/"$file"_gl_"$pz"_"$vr"_sol
+                done
             done
             rm ../solutions/"$file".gl
         ) &
