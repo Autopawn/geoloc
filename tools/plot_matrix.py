@@ -1,6 +1,9 @@
+# -*- coding: utf-8 -*-
+
 import sys
 import matplotlib
 import itertools
+from scipy.stats import linregress
 
 # v So that doens't trow error through ssh.
 matplotlib.use('Agg')
@@ -21,7 +24,7 @@ if __name__ == '__main__':
     for arg in sys.argv:
         if arg[0]!='-': argis.append(arg)
     if len(argis)<4 or len(argis)>6:
-        print("Usage: %s [-lx] [-ly] [-sx] [-sy] <summary_file> <output> <title> [<var_1>] [<var_2>]"%argis[0])
+        print("Usage: %s [-lx] [-ly] [-sx] [-sy] [-colors=<colordict>] <summary_file> <output> <title> [<var_1>] [<var_2>]"%argis[0])
     else:
         dims = len(argis)-4
         logx = "-lx" in sys.argv
@@ -29,6 +32,13 @@ if __name__ == '__main__':
         sharex = "-sx" in sys.argv
         sharey = "-sy" in sys.argv
         nullpoints = "-np" in sys.argv
+        colored = any(["-colors" in x for x in sys.argv])
+        if colored:
+            dictval = [x.split("=")[1] for x in sys.argv if "-colors" in x][0]
+            colordict = eval(dictval)
+        linreg = "-r" in sys.argv
+        assert(not nullpoints or not linreg)
+        assert(not nullpoints or (logx and logy) or (not logx and not logy))
 
         points = {}
         #
@@ -37,7 +47,9 @@ if __name__ == '__main__':
             li = li.strip()
             if li=="": continue
             li = li.split()
+
             if len(li)!=dims+4:
+
                 raise ValueError("Invalid line: "+str(li))
             name = li[0]
             xx = 'c' if li[1]=='c' else float(li[1])
@@ -83,6 +95,7 @@ if __name__ == '__main__':
 
         dimnames = argis[4:]
         assert(len(dimnames)==dims)
+        truefinalnames = []
 
         for i in range(yplots):
             if dims==2:
@@ -125,14 +138,15 @@ if __name__ == '__main__':
                     myxxvals = [xx for xx in xxvals+['c'] if keytup(xx) in points]
                     assert(all([xx=='c' for xx in myxxvals]) or 'c' not in myxxvals)
 
+                    col = colori(k,len(namevals)) if (not colored or name not in colordict) else colordict[name]
                     if 'c' in myxxvals:
                         pointsyy = points[keytup('c')]
                         try:
                             if not nullpoints:
                                 for yy in pointsyy:
-                                    subaxxarr.plot([xxmin,xxmax],[yy,yy],"-",color=colori(k,len(namevals)),alpha=0.1)
+                                    subaxxarr.plot([xxmin,xxmax],[yy,yy],"-",color=col,alpha=0.1)
                             yymean = np.mean(pointsyy)
-                            lin = subaxxarr.plot([xxmin,xxmax],[yymean,yymean],'-',color=colori(k,len(namevals)))
+                            lin = subaxxarr.plot([xxmin,xxmax],[yymean,yymean],'-',color=col)
                         except ValueError: pass
                     else:
                         data = [(xx,points[keytup(xx)]) for xx in myxxvals]
@@ -148,13 +162,32 @@ if __name__ == '__main__':
 
                         try:
                             if not nullpoints:
-                                    subaxxarr.plot(dotsx,dotsy,"o",color=colori(k,len(namevals)),alpha=0.1)
-                            lin = subaxxarr.plot(meanx,meany,'-',color=colori(k,len(namevals)))
+                                    subaxxarr.plot(dotsx,dotsy,"o",color=col,alpha=0.1)
+                            lin = subaxxarr.plot(meanx,meany,'-',color=col)
                         except ValueError: pass
-                    if i==0 and j==0: lins.append(lin[0])
+
+                        if linreg:
+                            if logx:
+                                (slope,inter,rcoef,pcoef,stderr) = linregress(np.log10(meanx),np.log10(meany))
+                                yini = (xxmin**slope)*(10**inter)
+                                yend = (xxmax**slope)*(10**inter)
+                                subaxxarr.text(1.4,0.15,'$\\log_{10}y= %.4f \\log_{10}x %+.4f$'%(slope,inter), fontsize=12)
+                            else:
+                                (slope,inter,rcoef,pcoef,stderr) = linregress(meanx,meany)
+                                yini = xxmin*slope+inter
+                                yend = xxmax*slope+inter
+                                subaxxarr.text(1.4,0.15,'$y= %.4f x %+.4f$'%(slope,inter), fontsize=12)
+
+                            coldark = (col[0]*0.6,col[1]*0.6,col[2]*0.6)
+                            loglin = subaxxarr.plot([xxmin,xxmax],[yini,yend],'--',color=coldark)
+                            truefinalnames.append("reg. "+name)
+                            lins.append(loglin[0])
+                    if i==0 and j==0:
+                        truefinalnames.append(name)
+                        lins.append(lin[0])
                 if i==0 and j==0:
                     siz = 14.0
-                    fig.legend(lins,namevals,loc='lower center',ncol=len(namevals),prop={'size':siz})
+                    fig.legend(lins,truefinalnames,loc='lower center',ncol=len(namevals),prop={'size':siz})
         #
         for i in range(yplots):
             if dims==2:

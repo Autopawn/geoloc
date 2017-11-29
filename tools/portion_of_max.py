@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sys
 import numpy as np
 
@@ -11,7 +12,7 @@ if __name__ == '__main__':
         maxname = argis[1]
         infile = argis[2]
         outfile = argis[3]
-        ignoremax = "-i" in sys.argv
+        ignoremax = "-i" in sys.argv # Just that the max doesn't appear on the final graph.
         negated = "-n" in sys.argv
         #
         fil = open(infile)

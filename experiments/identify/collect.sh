@@ -11,25 +11,25 @@ echo "" > collect/times.txt
 grep -R . solutions/*/lp_times.txt | sed -E "$lp_regex" >> collect/times.txt
 # grep -R . solutions/*/greedy_times.txt | sed -E "$greedy_regex" >> collect/times.txt
 python ../../tools/plot_matrix.py -hx -ly -sx -sy collect/times.txt collect/times.png \
-    'Execution times v/s $N$' '$P$' '$C$'
+    'Execution times v/s $N$' '$P$' '$Co$'
 python ../../tools/plot_matrix.py -hx -lx -ly -sx -sy collect/times.txt collect/lx_times.png \
-    'Execution times v/s $N$' '$P$' '$C$'
+    'Execution times v/s $N$' '$P$' '$Co$'
 
 # Collect the values
 echo "" > collect/vals.txt
 grep -R . solutions/*/lp_vals.txt | sed -E "$lp_regex" >> collect/vals.txt
 grep -R . solutions/*/greedy_vals.txt | sed -E "$greedy_regex" >> collect/vals.txt
 python ../../tools/plot_matrix.py -hx -sx -sy collect/vals.txt collect/vals.png \
-    'Solution value v/s $N$' '$P$' '$C$'
+    'Solution value v/s $N$' '$P$' '$Co$'
 
 # Collect the number of factories
 echo "" > collect/nfacs.txt
 grep -R . solutions/*/lp_nfacs.txt | sed -E "$lp_regex" >> collect/nfacs.txt
 grep -R . solutions/*/greedy_nfacs.txt | sed -E "$greedy_regex" >> collect/nfacs.txt
 python ../../tools/plot_matrix.py -hx -sx -sy collect/nfacs.txt collect/nfacs.png \
-    'No. of facilities v/s $N$' '$P$' '$C$'
+    'No. of facilities v/s $N$' '$P$' '$Co$'
 
 # Create file for the proportions
 python ../../tools/portion_of_max.py -i lp collect/vals.txt collect/props.txt
 python ../../tools/plot_matrix.py -hx -sx -sy collect/props.txt collect/props.png \
-    'Ratio to optimal solution v/s $N$' '$P$' '$C$'
+    'Ratio to optimal solution v/s $N$' '$P$' '$Co$'
