@@ -77,3 +77,7 @@ $ cabal install <package>
 ```
 
 * Package `munkres` for the hungarian method, thanks to *Balazs Komuves*.
+
+## Dependencies:
+
+For the `loglogloglinreg.py` tool, the `python3-scikit-learn` package is required.
