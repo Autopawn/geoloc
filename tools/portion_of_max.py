@@ -7,13 +7,14 @@ if __name__ == '__main__':
     for arg in sys.argv:
         if arg[0]!='-': argis.append(arg)
     if len(argis)!=4:
-        print("Usage: python %s <maxname> [-n] [-i] <infile> <outfile>"%sys.argv[0])
+        print("Usage: python %s <maxname> [-n] [-d] [-i] <infile> <outfile>"%sys.argv[0])
     else:
         maxname = argis[1]
         infile = argis[2]
         outfile = argis[3]
         ignoremax = "-i" in sys.argv # Just that the max doesn't appear on the final graph.
         negated = "-n" in sys.argv
+        justdifference = "-d" in sys.argv
         #
         fil = open(infile)
         results = {}
@@ -51,16 +52,20 @@ if __name__ == '__main__':
                 if maxkey in results: break
             assert(maxkey in results)
 
-            if results[maxkey]==0.0:
-                assert(results[key]==0.0)
-                portion = 1.0
+            if not justdifference:
+                if results[maxkey]==0.0:
+                    assert(results[key]==0.0)
+                    portion = 1.0
+                else:
+                    portion = results[key]/results[maxkey]
+                #
+                name = key[0]
+                if not (name!=maxname or portion==1.0):
+                    raise ValueError("maxname %s doesn't has portion 1.0"%str(maxname))
+                if negated: portion = 1-portion
             else:
-                portion = results[key]/results[maxkey]
-            #
-            name = key[0]
-            if not (name!=maxname or portion==1.0):
-                raise ValueError("maxname %s doesn't has portion 1.0"%str(maxname))
-            if negated: portion = 1-portion
+                portion = (1-2*negated)*(results[key]-results[maxkey])
+
             if not (name==maxname and ignoremax):
                 filo.write("%s "%key[0])
                 filo.write("%s "%str(key[-1]))

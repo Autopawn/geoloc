@@ -15,8 +15,8 @@ else
 fi
 
 # NOTE: Remember to change this in solve.sh too
-ncases=20
-ntiers=10
+ncases=10
+ntiers=100
 
 rm -rf solutions || true
 mkdir solutions

@@ -8,8 +8,8 @@ mkdir problems
 nntests="050 100 150 200"
 
 # NOTE: Remember to change this in solve.sh too
-ncases=20
-ntiers=10
+ncases=10
+ntiers=100
 
 # NOTE: Remember to change this in collect.sh too
 pptests=0.15

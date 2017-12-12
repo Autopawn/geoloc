@@ -8,6 +8,7 @@ pptests=0.15
 cctests=0.50
 
 parameters='($P='"$pptests"', C='"$cctests"'$)'
+colors='-colors={"gl":(1,0,0),"lp":(0,0,0)}'
 
 lp_regex="s/solutions\/([0-9]+)\/lp_\w+.txt:([0-9\.]+) (\w+)/lp c \1 k \2 \3/"
 fullVR_regex="s/solutions\/([0-9]+)\/fullVR_([0-9]+)_\w+.txt:([0-9\.]+) (\w+)/fullVR c \1 \2 \3 \4/"
@@ -43,3 +44,9 @@ python ../../tools/plot_matrix.py -sx -sy collect/props.txt collect/props.png \
     'Ratio to optimal solution v/s $VR$ '"$parameters" '$N$' '$PZ$'
 python ../../tools/plot_matrix.py -sx -sy -np collect/props.txt collect/props_np.png \
     'Ratio to optimal solution v/s $VR$ '"$parameters" '$N$' '$PZ$'
+
+# Create file for difference with the fullVR:
+python ../../tools/portion_of_max.py -i lp collect/vals.txt collect/props_wo_lp.txt
+python ../../tools/portion_of_max.py -d fullVR collect/props_wo_lp.txt collect/props_diff_fullVR.txt
+python ../../tools/plot_matrix.py -sx -sy -np collect/props_diff_fullVR.txt collect/props_np_diff_fullVR.png "$colors" \
+    'Difference with fullVR in ratio to optimal solution v/s $VR$ '"$parameters" '$N$' '$PZ$'
