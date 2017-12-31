@@ -120,7 +120,7 @@ lint solution_dissimilitude(const problem *prob,
                     if(dist<cmin) cmin = dist;
                     if(cmin<disim) break;
                 }
-                if(cmin>disim && MAX_LINT>cmin) disim = cmin;
+                if(disim<cmin && cmin<MAX_LINT) disim = cmin;
             }
         #else
             // Add distance from each facility in A to B.
@@ -309,6 +309,24 @@ solution **new_expand_solutions(const problem *prob,
 // Reduces an array (sols) with pointers to a set of solutions to target_n size, freeing memory of the discarted ones. *n_sols is modified.
 void reduce_solutions(const problem *prob,
         solution **sols, int *n_sols, int target_n, int vision_range){
+    // If the vision range is -1, use random selection.
+    if(vision_range==-1 && *n_sols>target_n){
+        // Put target_n randomly selected solutions first on the array:
+        for(int i=0;i<target_n;i++){
+            int choice = i+rand()%(*n_sols-i);
+            solution *aux = sols[i];
+            sols[i] = sols[choice];
+            sols[choice] = aux;
+        }
+        // Free other solutions:
+        for(int i=target_n;i<*n_sols;i++){
+            free(sols[i]);
+        }
+        // Set the amount of solutions right.
+        *n_sols = target_n;
+        return;
+    }
+    // Ensure that the vision_range isn't larger than the number of solutions.
     if(vision_range>*n_sols) vision_range = *n_sols;
     // Sort solution pointers from larger to smaller value of the solution.
     qsort(sols,*n_sols,sizeof(solution*),solution_value_cmp_inv);
@@ -348,7 +366,21 @@ void reduce_solutions(const problem *prob,
         if(n_pairs==0) break;
         dissimpair pair = heap_poll(heap,&n_pairs);
         if(!discarted[pair.indx_a] && !discarted[pair.indx_b]){
-            // printf("%6d%6d-%8lld\n",pair.indx_a,pair.indx_b,pair.dissim);
+            #ifdef PAIR_DISTANCE
+            // Get the distance on the linked list of the solutions of the pair:
+            // NOTE: this may be expensive to do.
+            int idx = pair.indx_a;
+            int llist_dist = 0;
+            while(idx != pair.indx_b){
+                idx = nexts[idx];
+                assert(idx!=-1);
+                llist_dist++;
+            }
+            // Print the indexes, dissimilitude and distance in the linked list:
+            int n_base = sols[pair.indx_a]->n_facilities;
+            printf("#DIST %d %d %d %llu %d\n",
+                n_base,pair.indx_a,pair.indx_b,pair.dissim,llist_dist);
+            #endif
             // Delete the second solution on the pair.
             int to_delete = pair.indx_b;
             discarted[to_delete] = 1;

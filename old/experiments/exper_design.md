@@ -78,17 +78,17 @@ Each experiment has 3 scripts, `generate.sh` that generates the problems, `solve
 
 Each experiment was run for 40 randomly generated test cases, the *means* are displayed as a curve.
 
-![](zzzresults/identify20171122/nfacs.png)
+![](zz_results/identify20171122/nfacs.png)
 
 From this graph we can see that specific choices of parameters $P$ and $C$ keep the number of facilities of the optimal solution constant as $N$ gets bigger, so keeping this parameters constant we can say that $N$ is the parameter of complexity.
 
-![](zzzresults/identify20171122/props.png)
+![](zz_results/identify20171122/props.png)
 
 We can see that the major differences between the solution obtained with the *greedy* algorithm and the optimal solution happen for larger values of $P$, $P \approx 0.2$ and values of $C$ around $0.5$, this happens when the number of facilities is between $3$ and $5$.
 
 Since the algorithm is well suited for problems where the number of facilities on the optimal solution is big but it would we worth to use it on problems where *greedy* doesn't perform very well, we will focus on problems with $C=0.5$ and $P=0.15$, where we can expect $4$ or $5$ facilities on the optimal solution.
 
-![](zzzresults/identify20171122/times.png)
+![](zz_results/identify20171122/times.png)
 
 From this graph we can see that the execution times for $N=300$ can be up to 10 times larger than for small values of $P$ (with there are less facilities on the optimal solution than when there are many), this difference however is not very significant but is another reason to use the algorithm for this particular set of problems.
 

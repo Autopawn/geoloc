@@ -20,16 +20,24 @@ int main(int argc, char **argv){
     }
     if(!good){
         printf("Usage: %s <pool_size> <vision_range> <max_sols_to_show> <problem_file> <output_file>\n",argv[0]);
+        printf("A vision_range of -1 will activate random choice reduction.\n");
+        printf("A pool_size of 1 will activate greedy mode.\n");
         exit(1);
     }
     printf("Pool size: %d\n",pool_size);
-    if(pool_size==1){
-        vision_range=1;
-        printf("Vision range: %d\n",vision_range);
-        printf("\t (Greedy)\n");
+    if(vision_range==-1){
+        if(pool_size==1){
+            vision_range=1;
+            printf("Vision range: %d\n",vision_range);
+            printf("\t (Greedy)\n");
+        }else{
+            printf("Vision range: %d\n",vision_range);
+        }
     }else{
         printf("Vision range: %d\n",vision_range);
+        printf("\t (Random selection)\n");
     }
+    assert(vision_range>=-1);
     printf("Max solutions to show: %d\n",max_to_show);
     // Load problem file:
     problem *prob = new_problem_load(input_file);
