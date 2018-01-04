@@ -1,6 +1,6 @@
 #!/bin/bash -xe
 
-source ./psize_vars.sh
+source ./vrfx_vars.sh
 
 rm -rf problems || true
 rm -rf solutions || true

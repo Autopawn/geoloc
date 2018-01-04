@@ -4,7 +4,7 @@
 // MISCELANEOUS AND COMPARISON FUNCTIONS
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-inline void *safe_malloc(size_t size){
+static inline void *safe_malloc(size_t size){
     void *ptr = malloc(size);
     if(size>0 && ptr==NULL){
         fprintf(stderr,"ERROR: Not enough memory!\n");
@@ -21,6 +21,7 @@ uint hash_int(uint x){
     return x;
 }
 
+// Compare the distance of two clients to one specific facility
 static const problem *prob_value_for_compare_dist_to_f;
 static int f_value_for_compare_dist_to_f;
 int compare_dist_to_f(const void * a, const void * b){
@@ -146,6 +147,8 @@ lint solution_dissimilitude(const problem *prob,
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // FUTURESOL
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+// Possible future solution that results from another one.
 
 typedef struct {
     solution *origin;
@@ -451,7 +454,6 @@ void reduce_solutions(const problem *prob,
     free(prevs);
 }
 
-
 solution **new_find_best_solutions(problem* prob,
         int pool_size, int vision_range, int *final_n, int *max_sol_size){
     //
@@ -476,8 +478,8 @@ solution **new_find_best_solutions(problem* prob,
         pools[i] = new_expand_solutions(prob, pools[i-1],
             pools_size[i-1], &pools_size[i]);
         #ifdef VERBOSE
-        printf("Base %d:\n",i);
-        print_solsets(pools[i],pools_size[i]);
+            printf("#BASE %d %d\n",i,pools_size[i]);
+            print_solsets(pools[i],pools_size[i]);
         #endif
         if(pools_size[i]==0){
             *max_sol_size = i-1;
@@ -485,14 +487,82 @@ solution **new_find_best_solutions(problem* prob,
             break;
         }
         printf("Reducing %d solutions of size %d...\n",pools_size[i],i);
-        reduce_solutions(prob, pools[i], &pools_size[i],
-            pool_size, vision_range);
+        #ifndef EXTENSIVE_VR_TEST_STEP
+            // Apply reduction on the pool:
+            reduce_solutions(prob, pools[i], &pools_size[i],
+                pool_size, vision_range);
+        #else
+            // Create a copy of the whole pool.
+            int sols_size_c = pools_size[i];
+            solution **sols_c = safe_malloc(sizeof(solution*)*sols_size_c);
+            for(int k=0;k<sols_size_c;k++){
+                sols_c[k] = safe_malloc(sizeof(solution));
+                memcpy(sols_c[k],pools[i][k],sizeof(solution));
+            }
+            // Apply reduction on the pool:
+            reduce_solutions(prob, pools[i], &pools_size[i],
+                pool_size, vision_range);
+            //Perform tests for several vision ranges:
+            int vrmax = vision_range;
+            #ifdef EXTENSIVE_VR_TEST_MAX
+                if(vrmax>EXTENSIVE_VR_TEST_MAX) vrmax = EXTENSIVE_VR_TEST_MAX;
+            #endif
+            for(int p=0; p<vrmax; p+=EXTENSIVE_VR_TEST_STEP){
+                // ^ Repeat for several vision ranges.
+                if(p==1) continue;
+                int vision_range_x = (p==0)? 1:p;
+                int sols_size_x = sols_size_c;
+                // Create a copy (x) of the whole pool.
+                solution **sols_x = safe_malloc(sizeof(solution*)*sols_size_c);
+                for(int k=0;k<sols_size_x;k++){
+                    sols_x[k] = safe_malloc(sizeof(solution));
+                    memcpy(sols_x[k],sols_c[k],sizeof(solution));
+                }
+                // Reduce the copy (x) with the vrange:
+                reduce_solutions(prob,sols_x, &sols_size_x,
+                    pool_size, vision_range_x);
+                // Compute how many of the solutions with the vision_range
+                // remained on the reduction with vision_range_x:
+                int remained = 0;
+                assert(pools_size[i]==sols_size_x);
+                int p_start_x = 0;
+                for(int k=0;k<pools_size[i];k++){
+                    int r = p_start_x;
+                    while(r<sols_size_x){
+                        if(sols_x[r]->value>pools[i][k]->value){
+                            p_start_x += 1;
+                            assert(p_start_x==r+1);
+                        }else if(sols_x[r]->value<pools[i][k]->value){
+                            break;
+                        }
+                        if(solution_dissimilitude(prob,
+                                pools[i][k],sols_x[r])==0){
+                            remained += 1;
+                        }
+                        r+=1;
+                    }
+                }
+                // Free solutions of copy(x):
+                for(int k=0;k<sols_size_x;k++){
+                    free(sols_x[k]);
+                }
+                free(sols_x);
+                float remradio = (float)remained/(float)sols_size_x;
+                printf("#REMAINED %d %d from %d to %d with vr %d radio %.5f\n",
+                    i,remained,sols_size_c,sols_size_x,vision_range_x,remradio);
+            }
+            // Free copy of the whole pool.
+            for(int k=0;k<sols_size_c;k++){
+                free(sols_c[k]);
+            }
+            free(sols_c);
+        #endif
         // Realloc to reduce memory usage:
         pools[i] = realloc(pools[i],sizeof(solution*)*pools_size[i]);
         //
         #ifdef VERBOSE
-        printf("Pool %d:\n",i);
-        print_solsets(pools[i],pools_size[i]);
+            printf("#POOL %d %d\n",i,pools_size[i]);
+            print_solsets(pools[i],pools_size[i]);
         #endif
         total_pools_size += pools_size[i];
     }

@@ -31,6 +31,7 @@ if __name__ == '__main__':
         logy = "-ly" in sys.argv
         sharex = "-sx" in sys.argv
         sharey = "-sy" in sys.argv
+        histogram = "-hg" in sys.argv
         nullpoints = "-np" in sys.argv
         colored = any(["-colors" in x for x in sys.argv])
         if colored:
@@ -49,7 +50,6 @@ if __name__ == '__main__':
             li = li.split()
 
             if len(li)!=dims+4:
-
                 raise ValueError("Invalid line: "+str(li))
             name = li[0]
             xx = 'c' if li[1]=='c' else float(li[1])
@@ -160,34 +160,41 @@ if __name__ == '__main__':
                         dotsx = [dot[0] for dot in dots]
                         dotsy = [dot[1] for dot in dots]
 
-                        try:
-                            if not nullpoints:
+                        if histogram:
+                            subaxxarr.hist(dotsx,range=(xxmin,xxmax),bins=40)
+                        else:
+                            try:
+                                if not nullpoints:
                                     subaxxarr.plot(dotsx,dotsy,"o",color=col,alpha=0.1)
-                            lin = subaxxarr.plot(meanx,meany,'-',color=col)
-                        except ValueError: pass
+                                lin = subaxxarr.plot(meanx,meany,'-',color=col)
+                            except ValueError: pass
 
-                        if linreg:
-                            if logx:
-                                (slope,inter,rcoef,pcoef,stderr) = linregress(np.log10(meanx),np.log10(meany))
-                                yini = (xxmin**slope)*(10**inter)
-                                yend = (xxmax**slope)*(10**inter)
-                                subaxxarr.text(1.4,0.15,'$\\log_{10}y= %.4f \\log_{10}x %+.4f$'%(slope,inter), fontsize=12)
-                            else:
-                                (slope,inter,rcoef,pcoef,stderr) = linregress(meanx,meany)
-                                yini = xxmin*slope+inter
-                                yend = xxmax*slope+inter
-                                subaxxarr.text(1.4,0.15,'$y= %.4f x %+.4f$'%(slope,inter), fontsize=12)
+                            if linreg:
+                                if logx:
+                                    (slope,inter,rcoef,pcoef,stderr) = linregress(np.log10(meanx),np.log10(meany))
+                                    yini = (xxmin**slope)*(10**inter)
+                                    yend = (xxmax**slope)*(10**inter)
+                                    subaxxarr.text(1.4,0.15,'$\\log_{10}y= %.4f \\log_{10}x %+.4f$'%(slope,inter), fontsize=12)
+                                else:
+                                    (slope,inter,rcoef,pcoef,stderr) = linregress(meanx,meany)
+                                    yini = xxmin*slope+inter
+                                    yend = xxmax*slope+inter
+                                    subaxxarr.text(1.4,0.15,'$y= %.4f x %+.4f$'%(slope,inter), fontsize=12)
 
-                            coldark = (col[0]*0.6,col[1]*0.6,col[2]*0.6)
-                            loglin = subaxxarr.plot([xxmin,xxmax],[yini,yend],'--',color=coldark)
-                            truefinalnames.append("reg. "+name)
-                            lins.append(loglin[0])
-                    if i==0 and j==0:
-                        truefinalnames.append(name)
-                        lins.append(lin[0])
+                                coldark = (col[0]*0.6,col[1]*0.6,col[2]*0.6)
+                                loglin = subaxxarr.plot([xxmin,xxmax],[yini,yend],'--',color=coldark)
+                                truefinalnames.append("reg. "+name)
+                                lins.append(loglin[0])
+                    if name not in truefinalnames:
+                        try:
+                            lins.append(lin[0])
+                            truefinalnames.append(name)
+                        except:
+                            pass
                 if i==0 and j==0:
                     siz = 14.0
-                    fig.legend(lins,truefinalnames,loc='lower center',ncol=len(namevals),prop={'size':siz})
+                    if not histogram:
+                        fig.legend(lins,truefinalnames,loc='lower center',ncol=len(namevals),prop={'size':siz})
         #
         for i in range(yplots):
             if dims==2:

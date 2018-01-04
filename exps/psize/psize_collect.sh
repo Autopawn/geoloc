@@ -2,7 +2,7 @@
 
 source ./psize_vars.sh
 
-target="collect/$(date +%Y%m%d_%H%M)"
+target="collect/$(date +%Y%m%d_%H%M%S)"
 mkdir -p $target
 cat psize_vars.sh > $target/vars.txt
 
@@ -15,7 +15,6 @@ lp_regex="s/solutions\/([0-9]+)\/lp_\w+.txt:([0-9\.]+) (\w+)/lp c \1 \2 \3/"
 gl_regex="s/solutions\/([0-9]+)\/gl_([0-9]+)_\w+.txt:([0-9\.]+) (\w+)/gl \2 \1 \3 \4/"
 
 # Collect the times
-echo "" > $target/times.txt
 grep -R . solutions/*/lp_times.txt | sed -E "$lp_regex" >> \
     $target/times.txt
 grep -R . solutions/*/gl_*_times.txt | sed -E "$gl_regex" >> \
@@ -25,7 +24,6 @@ python ../../tools/plot_matrix.py "$colors" -ly -sx -sy $target/times.txt \
     'Tiempos de ejecución v/s $PZ$ con full-$VR$ '"$parameters" '$N$'
 
 # Collect the values
-echo "" > $target/vals.txt
 grep -R . solutions/*/lp_vals.txt | sed -E "$lp_regex" >> \
     $target/vals.txt
 grep -R . solutions/*/gl_*_vals.txt | sed -E "$gl_regex" >> \
@@ -35,7 +33,6 @@ python ../../tools/plot_matrix.py "$colors" -sx $target/vals.txt \
     'Valor de la solución v/s $PZ$ con full-$VR$ '"$parameters" '$N$'
 
 # Collect the number of factories
-echo "" > $target/nfacs.txt
 grep -R . solutions/*/lp_nfacs.txt | sed -E "$lp_regex" >> \
     $target/nfacs.txt
 grep -R . solutions/*/gl_*_nfacs.txt | sed -E "$gl_regex" >> \

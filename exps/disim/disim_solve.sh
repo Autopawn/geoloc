@@ -35,8 +35,15 @@ cd problems; for file in $problems ; do
         # Solve using geoloc
         vrange=$(python -c "print(int(\"$pz\")*$nn)")
         ../../../geoloc_pairs.exe "$pz" "$vrange" 1 ../solutions/"$file".gl \
-        ../solutions/"$file"_gl_"$pz"_sol | grep '#DIST' > \
-        ../solutions/"$file"_gl_"$pz"_dst
+        ../solutions/"$file"_gl_"$pz"_sol > ../solutions/"$file"_gl_"$pz"_out
+        cat ../solutions/"$file"_gl_"$pz"_out | grep '#DIST' > \
+            ../solutions/"$file"_gl_"$pz"_dst
+        cat ../solutions/"$file"_gl_"$pz"_out | egrep '#BASE|#POOL' > \
+            ../solutions/"$file"_gl_"$pz"_pool
+        rm ../solutions/"$file"_gl_"$pz"_out
+        ../../../geoloc_vrtest.exe "$pz" "$vrange" 1 ../solutions/"$file".gl \
+            ../solutions/"$file"_gl_"$pz"_sol | grep '#REMAINED' > \
+            ../solutions/"$file"_gl_"$pz"_rem
     ) &
     done
     wait
