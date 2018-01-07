@@ -26,7 +26,7 @@ cd problems; for foldr in * ; do
     touch ../solutions/"$foldr"/lp_nfacs.txt
     touch ../solutions/"$foldr"/lp_vals.txt
     touch ../solutions/"$foldr"/lp_times.txt
-    for file in "$foldr"/* ; do #(
+    for file in "$foldr"/* ; do (
         bfname=$(basename "$file")
         #### Get the optimal solution:
         python ../../../tools/prob_translator.py "$file" lpsolve ../solutions/"$file".lp
@@ -68,7 +68,7 @@ cd problems; for foldr in * ; do
             >> ../solutions/"$foldr"/greedy_times.txt
         # Delete solution:
         rm ../solutions/"$file"_greedy_sol
-    #) &
+    ) &
     done
     wait
 done
