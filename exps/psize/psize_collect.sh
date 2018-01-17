@@ -8,8 +8,6 @@ cat psize_vars.sh > $target/vars.txt
 
 echo "TARGET: $target"
 
-parameters='($P='"$pptests"', C='"$cctests"'$)'
-
 lp_regex="s/solutions\/([0-9]+)\/lp_\w+.txt:([0-9\.]+) (\w+)/lp c \1 \2 \3/"
 gl_regex="s/solutions\/([0-9]+)\/gl_([0-9]+)_\w+.txt:([0-9\.]+) (\w+)/gl \2 \1 \3 \4/"
 
