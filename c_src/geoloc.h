@@ -9,6 +9,7 @@
 
 #define MAX_FACILITIES 1024
 #define MAX_CLIENTS 1024
+#define MAX_SOL_SIZE 30
 
 typedef long long int lint;
 typedef unsigned int uint;
@@ -31,16 +32,16 @@ typedef struct{
     // ^ Gains for connecting one weight of unit.
     lint transport_cost;
     // ^ Cost of connecting one weight of unit one unit of distance.
-    int nearest[MAX_FACILITIES][MAX_CLIENTS];
+    short nearest[MAX_FACILITIES][MAX_CLIENTS];
     // ^ Optimization automatically computed.
 } problem;
 
 struct _solution {
     int n_facilities;
     // ^ Number of facilities in this solution.
-    int facilities[MAX_FACILITIES];
+    short facilities[MAX_SOL_SIZE];
     // ^ Facilities from the smaller index to the larger one.
-    int assignments[MAX_CLIENTS];
+    short assignments[MAX_CLIENTS];
     // ^ Which facility is working each client.
     lint value;
     // ^ Value of this solution on the objective function.
