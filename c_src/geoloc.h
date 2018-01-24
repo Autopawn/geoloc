@@ -7,8 +7,8 @@
 #include <string.h>
 #include <assert.h>
 
-#define MAX_FACILITIES 1024
-#define MAX_CLIENTS 1024
+#define MAX_FACILITIES 1000
+#define MAX_CLIENTS 1000
 #define MAX_SOL_SIZE 30
 
 typedef long long int lint;
