@@ -8,4 +8,4 @@ ntiers=8
 
 geoloc_psizes="400 800"
 
-colors='-colors={"lp":(0,0,0),"greedy":(1,0,0),"geoloc400":(0.3,1,0.3),"geoloc8000":(0,1,0),"random4000":(0,1,1),"1vr4000":(1,1,0)}'
+colors='-colors={"lp":(0,0,0),"greedy":(1,0,0),"geoloc400":(0.3,1,0.3),"geoloc8000":(0,1,0),"random2400":(0,1,1),"1vr2400":(1,1,0)}'
