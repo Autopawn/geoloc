@@ -88,8 +88,8 @@ cd problems; for foldr in * ; do
                     >> ../solutions/"$foldr"/stra_"$straname"_times.txt
             done
 
-            straname="random8000"
-            ../../../geoloc.exe 8000 -1 1 ../solutions/"$file".gl \
+            straname="random4000"
+            ../../../geoloc.exe 4000 -1 1 ../solutions/"$file".gl \
                 ../solutions/"$file"_"$straname"_sol
             # Get number of facilities
             cat ../solutions/"$file"_"$straname"_sol | grep "Facilities:" | \
@@ -104,8 +104,8 @@ cd problems; for foldr in * ; do
                 awk '{print $NF}' | sed -e "s/$/ $bfname/" \
                 >> ../solutions/"$foldr"/stra_"$straname"_times.txt
 
-            straname="1vr8000"
-            ../../../geoloc.exe 8000 1 1 ../solutions/"$file".gl \
+            straname="1vr4000"
+            ../../../geoloc.exe 4000 1 1 ../solutions/"$file".gl \
                 ../solutions/"$file"_"$straname"_sol
             # Get number of facilities
             cat ../solutions/"$file"_"$straname"_sol | grep "Facilities:" | \

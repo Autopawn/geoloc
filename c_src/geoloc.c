@@ -25,8 +25,8 @@ uint hash_int(uint x){
 static const problem *prob_value_for_compare_dist_to_f;
 static int f_value_for_compare_dist_to_f;
 int compare_dist_to_f(const void * a, const void * b){
-    int ia = *(int*)a;
-    int ib = *(int*)b;
+    short ia = *(short*)a;
+    short ib = *(short*)b;
     const problem *prob = prob_value_for_compare_dist_to_f;
     const int f = f_value_for_compare_dist_to_f;
     return prob->distances[f][ia]-prob->distances[f][ib];
@@ -38,7 +38,7 @@ int solution_value_cmp_inv(const void *a, const void *b){
     return (*bb)->value - (*aa)->value;
 }
 
-void add_to_sorted(int *array, int *len, int val){
+void add_to_sorted(short *array, int *len, short val){
     int place = *len;
     while(place>0){
         if(array[place-1]<=val) break;
@@ -63,7 +63,7 @@ solution empty_solution(){
 }
 
 // | Adds a facility to the solution, returns the delta of the value on the objective function.
-lint solution_add(const problem *prob, solution *sol, int newf){
+lint solution_add(const problem *prob, solution *sol, short newf){
     // Check if f is already on the solution:
     for(int f=0;f<sol->n_facilities;f++){
         if(sol->facilities[f]==newf) return 0;
@@ -76,7 +76,7 @@ lint solution_add(const problem *prob, solution *sol, int newf){
     lint delta = 0;
     // Reassign clients to the new facility, from nearest to further.
     for(int c=0;c<prob->n_clients;c++){
-        int cli = prob->nearest[newf][c];
+        short cli = prob->nearest[newf][c];
         // Distance of that client to the new facility:
         lint distance = prob->distances[newf][cli];
         if(distance>crit_rad) break;
@@ -113,10 +113,10 @@ lint solution_dissimilitude(const problem *prob,
     for(int t=0;t<2;t++){
         #ifdef HAUSDORFF
             for(int ai=0;ai<sol_a->n_facilities;ai++){
-                int f_a = sol_a->facilities[ai];
+                short f_a = sol_a->facilities[ai];
                 lint cmin = MAX_LINT;
                 for(int bi=0;bi<sol_b->n_facilities;bi++){
-                    int f_b = sol_b->facilities[bi];
+                    short f_b = sol_b->facilities[bi];
                     lint dist = prob->fdistances[f_a][f_b];
                     if(dist<cmin) cmin = dist;
                     if(cmin<disim) break;
@@ -127,9 +127,9 @@ lint solution_dissimilitude(const problem *prob,
             // Add distance from each facility in A to B.
             for(int ai=0;ai<sol_a->n_facilities;ai++){
                 lint min_dist = -1;
-                int f_a = sol_a->facilities[ai];
+                short f_a = sol_a->facilities[ai];
                 for(int bi=0;bi<sol_b->n_facilities;bi++){
-                    int f_b = sol_b->facilities[bi];
+                    short f_b = sol_b->facilities[bi];
                     lint dist = prob->fdistances[f_a][f_b];
                     if(min_dist==-1 || dist<min_dist) min_dist = dist;
                 }
@@ -155,7 +155,7 @@ typedef struct {
     int newf;
     uint hash;
     int n_facilities;
-    int facilities[0]; // Flexible array member.
+    short facilities[0]; // Flexible array member.
 } futuresol;
 
 int futuresol_cmp(const void *a, const void *b){
@@ -229,7 +229,7 @@ void problem_compute_nearest(problem* prob){
         for(int c=0;c<prob->n_clients;c++) prob->nearest[f][c] = c;
         f_value_for_compare_dist_to_f = f;
         prob_value_for_compare_dist_to_f = prob;
-        qsort(prob->nearest[f],prob->n_clients,sizeof(int),compare_dist_to_f);
+        qsort(prob->nearest[f],prob->n_clients,sizeof(short),compare_dist_to_f);
     }
 }
 
@@ -237,13 +237,13 @@ void problem_compute_nearest(problem* prob){
 solution **new_expand_solutions(const problem *prob,
         solution** sols, int n_sols, int *out_n_sols){
     int csize = sols[0]->n_facilities;
-    size_t fsol_size = sizeof(futuresol)+sizeof(int)*(csize+1);
+    size_t fsol_size = sizeof(futuresol)+sizeof(short)*(csize+1);
     void *futuresols = safe_malloc(fsol_size*n_sols*prob->n_facilities);
     int n_futuresols = 0;
     // Create solutions for the next iteration.
     for(int i=0;i<n_sols;i++){
         assert(sols[i]->n_facilities==csize);
-        for(int f=0;f<prob->n_facilities;f++){
+        for(short f=0;f<prob->n_facilities;f++){
             futuresol *fsol = (futuresol *)(futuresols+fsol_size*n_futuresols);
             // Create a potential future solution, with the old one and adding a facility.
             fsol->origin = sols[i];
@@ -473,7 +473,8 @@ solution **new_find_best_solutions(problem* prob,
     // Create all the next pools:
     *max_sol_size = 0;
     int total_pools_size = 0;
-    for(int i=1;i<=MAX_FACILITIES;i++){
+    int STEPS = MAX_SOL_SIZE<MAX_FACILITIES? MAX_SOL_SIZE:MAX_FACILITIES;
+    for(int i=1;i<=STEPS;i++){
         printf("Expanding %d solutions of size %d...\n",pools_size[i-1],i-1);
         pools[i] = new_expand_solutions(prob, pools[i-1],
             pools_size[i-1], &pools_size[i]);
@@ -565,6 +566,10 @@ solution **new_find_best_solutions(problem* prob,
             print_solsets(pools[i],pools_size[i]);
         #endif
         total_pools_size += pools_size[i];
+        //
+        if(i==STEPS){
+            printf("MAX_SOL_SIZE reached.\n");
+        }
     }
     printf("Merging pools...\n");
     // Merge all solution pointers into one final array:
