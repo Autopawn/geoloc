@@ -1,6 +1,6 @@
 #!/bin/bash -xe
 
-source ./"$1".sh
+source ./vars_"$1".sh
 rm -rf prob_"$1" || true
 rm -rf sols_"$1" || true
 
