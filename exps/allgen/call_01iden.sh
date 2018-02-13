@@ -1,12 +1,6 @@
-#PBS -N 01iden
-#PBS -o result.out -e result.err
-#PBS -l cput=8000:00:01
-#PBS -l walltime=8000:00:01
-#PBS mem=30gb
+source "./vars_01iden.sh"
 
 bash generate.sh 01iden
 
-# Set memory limit for this and all subprocesses
-ulimit -Sv $((1024))
-
-bash solve_lp.sh 01iden lp
+qsub -N 01iden_lp solve_lp.sh 01iden lp
+qsub -N 01iden_greedy solve_geoloc.sh greedy 1 1

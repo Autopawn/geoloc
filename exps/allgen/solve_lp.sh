@@ -1,5 +1,4 @@
 #!/bin/bash -e
-#NOTE: put PBS -N name
 #PBS -o result.out -e result.err
 #PBS -l cput=8000:00:01
 #PBS -l walltime=8000:00:01
@@ -22,6 +21,8 @@ rm -rf sols_"$1" || true
 mkdir sols_"$1"
 
 strat="$2"
+
+ulimit -Sv "$memlimit"
 
 cd prob_"$1"; for foldr in * ; do
     mkdir -p ../sols_"$1"/"$foldr"

@@ -1,4 +1,8 @@
 #!/bin/bash -e
+#PBS -o result.out -e result.err
+#PBS -l cput=8000:00:01
+#PBS -l walltime=8000:00:01
+#PBS mem=30gb
 
 # USAGE:
 # solve_geoloc.sh <experiment> <strategy_name> <pool_size> <vision_range>
@@ -20,6 +24,8 @@ strat="$2"
 pz="$3"
 vr="$4"
 
+ulimit -Sv "$memlimit"
+
 cd prob_"$1"; for foldr in * ; do
     mkdir -p ../sols_"$1"/"$foldr"
     : > ../sols_"$1"/"$strat"_completed
@@ -31,11 +37,19 @@ cd prob_"$1"; for foldr in * ; do
         for kk in $(seq 1 $ncases); do (
             file="$foldr"/prob_"$tt"_"$kk"
             bfile=$(basename "$file")
+            nn=$(cat "$file" | grep "c " | wc -l)
             # Translate the problem to its geoloc version:
             python ../../../tools/prob_translator.py "$file" geoloc \
                 ../sols_"$1"/"$file"_"$strat"_prob
+            if [ -z "$vr" ]; then
+                # Default vision range = 2*max(pz,nn)
+                maxn=$(python -c "print(max("$pz","$nn"))")
+                gvr=$((2*maxn))
+            else
+                gvr="$vr"
+            fi
             # Solve, get only the best solution
-            ../../../geoloc.exe "$pz" "$vr" 1 \
+            ../../../geoloc.exe "$pz" "$gvr" 1 \
                 ../sols_"$1"/"$file"_"$strat"_prob \
                 ../sols_"$1"/"$file"_"$strat"_sol
             # Remove the translation because it won't be needed longer

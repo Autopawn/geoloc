@@ -4,3 +4,5 @@ cctests="0.20 0.40 0.60 0.80"
 
 ntiers=1
 ncases=20
+
+memlimit=$((1*1024*1024))
