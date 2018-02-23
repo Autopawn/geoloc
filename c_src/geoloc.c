@@ -471,7 +471,7 @@ solution **new_find_best_solutions(problem* prob,
     pools[0] = pool0;
     pools_size[0] = 1;
     // Create all the next pools:
-    *max_sol_size = 0;
+    *max_sol_size = -1;
     int total_pools_size = 0;
     int STEPS = MAX_SOL_SIZE<MAX_FACILITIES? MAX_SOL_SIZE:MAX_FACILITIES;
     for(int i=1;i<=STEPS;i++){
@@ -571,6 +571,7 @@ solution **new_find_best_solutions(problem* prob,
             printf("MAX_SOL_SIZE reached.\n");
         }
     }
+    if(*max_sol_size==-1) max_sol_size = MAX_SOL_SIZE;
     printf("Merging pools...\n");
     // Merge all solution pointers into one final array:
     solution **final = safe_malloc(sizeof(solution*)*total_pools_size);
