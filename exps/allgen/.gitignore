@@ -1,2 +1,5 @@
 prob_*
 sols_*
+.nfs*
+out
+coll_*

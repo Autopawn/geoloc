@@ -571,7 +571,7 @@ solution **new_find_best_solutions(problem* prob,
             printf("MAX_SOL_SIZE reached.\n");
         }
     }
-    if(*max_sol_size==-1) max_sol_size = MAX_SOL_SIZE;
+    if(*max_sol_size==-1) *max_sol_size = MAX_SOL_SIZE;
     printf("Merging pools...\n");
     // Merge all solution pointers into one final array:
     solution **final = safe_malloc(sizeof(solution*)*total_pools_size);

@@ -5,7 +5,8 @@ bash generate.sh 03vrfx
 rm -rf sols_03vrfx || true
 mkdir sols_03vrfx
 
-outdir="out/03vrfx/$(date +%Y%m%d_%H%M%S)"
+#outdir="out/03vrfx/$(date +%Y%m%d_%H%M%S)"
+outdir="out_03vrfx"
 mkdir -p "$outdir"
 
 

@@ -1,11 +1,12 @@
 source "./vars_04many.sh"
 
-#bash generate.sh 04many
+bash generate.sh 04many
 
 rm -rf sols_04many || true
 mkdir sols_04many
 
-outdir="out/04many/$(date +%Y%m%d_%H%M%S)"
+#outdir="out/04many/$(date +%Y%m%d_%H%M%S)"
+outdir="out_04many"
 mkdir -p "$outdir"
 
 
