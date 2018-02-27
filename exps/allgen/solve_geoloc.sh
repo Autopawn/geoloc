@@ -31,7 +31,7 @@ for nn in $nntests; do
         for cc in $cctests; do
             allgood=1
             for pal in $(cat ../sols_"$EXP"/"$strat"_terminated); do
-                if [ "$pp"_"$cc" -eq "$pal" ]; then
+                if [ "$pp"_"$cc" == "$pal" ]; then
                     allgood=0
                 fi
             done
