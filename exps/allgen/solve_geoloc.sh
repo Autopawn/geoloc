@@ -1,7 +1,7 @@
 #!/bin/bash -e
 #PBS -l cput=8000:00:01
 #PBS -l walltime=8000:00:01
-#PBS mem=30gb
+#PBS mem=26gb
 
 # VARS:
 # EXP STRA PZ VR
@@ -24,11 +24,21 @@ ulimit -Sv "$memlimit"
 set -e
 
 : > sols_"$EXP"/"$strat"_completed
+: > sols_"$EXP"/"$strat"_terminated
 cd prob_"$EXP"
-for pp in $pptests; do
-    for cc in $cctests; do
-        allgood=1
-        for nn in $nntests; do
+for nn in $nntests; do
+    for pp in $pptests; do
+        for cc in $cctests; do
+            allgood=1
+            for pal in $(cat ../sols_"$EXP"/"$strat"_terminated); do
+                if [ "$pp"_"$cc" -eq "$pal" ]; then
+                    allgood=0
+                fi
+            done
+            if [ "$allgood" -eq 0 ]; then
+                break
+            fi
+
             foldr="$nn"_"$pp"_"$cc"
 
             mkdir -p ../sols_"$EXP"/"$foldr"
@@ -65,7 +75,7 @@ for pp in $pptests; do
                         awk '{print $NF}' | sed -e "s/$/ $bfile/" \
                         >> ../sols_"$EXP"/"$foldr"/"$strat"_nfacs
                     # Get max size found
-                    cat ../sols_"$EXP"/"$file"_"$strat"_sol | grep "Max_size_found:" | \
+                    cat ../sols_"$EXP"/"$file"_"$strat"_sol | grep "Iterations:" | \
                         awk '{print $NF}' | sed -e "s/$/ $bfile/" \
                         >> ../sols_"$EXP"/"$foldr"/"$strat"_msize
                     # Get value of objective function
@@ -91,6 +101,7 @@ for pp in $pptests; do
                     fi
                 done
                 if [ "$allgood" -eq 0 ]; then
+                    echo "$pp"_"$cc" >> ../sols_"$EXP"/"$strat"_terminated
                     break
                 fi
             done

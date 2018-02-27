@@ -9,7 +9,7 @@
 
 #define MAX_FACILITIES 1000
 #define MAX_CLIENTS 1000
-#define MAX_SOL_SIZE 30
+#define MAX_SOL_SIZE 20
 
 typedef long long int lint;
 typedef unsigned int uint;
@@ -52,13 +52,13 @@ typedef struct _solution solution;
 solution empty_solution();
 
 solution **new_find_best_solutions(problem* prob,
-        int pool_size, int vision_range, int *final_n, int *max_sol_size);
+        int pool_size, int vision_range, int *final_n, int *n_iterations);
 
 problem *new_problem_load(const char *file);
 
 void save_solutions(const char *file, solution **sols, int n_sols,
         const char *input_file, int pool_size, int vision_range,
-        float seconds, int max_sol_size);
+        float seconds, int n_iterations);
 
 static inline void print_solution(FILE *f, const solution *sol){
     fprintf(f,"SOLUTION:\n");

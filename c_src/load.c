@@ -115,7 +115,7 @@ problem *new_problem_load(const char *file){
 
 void save_solutions(const char *file, solution **sols, int n_sols,
         const char *input_file, int pool_size, int vision_range,
-        float seconds, int max_sol_size){
+        float seconds, int n_iterations){
     FILE *fp;
     printf("Opening file \"%s\"...\n",file);
     fp = fopen(file,"w");
@@ -127,7 +127,7 @@ void save_solutions(const char *file, solution **sols, int n_sols,
     fprintf(fp,"# Time: %f\n",seconds);
     fprintf(fp,"# Input_file: %s\n",input_file);
     fprintf(fp,"# Pool_size: %d\n",pool_size);
-    fprintf(fp,"# Max_size_found: %d\n",max_sol_size);
+    fprintf(fp,"# Iterations: %d\n",n_iterations);
     fprintf(fp,"# Vision_range: %d\n",vision_range);
     #ifdef HAUSDORFF
     fprintf(fp,"# Dissimilitude: HAUSDORFF\n");
