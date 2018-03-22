@@ -13,19 +13,12 @@ mkdir -p "$outdir"
 qsub -N 03vrfx_lp -o "$outdir"/lp.out -e "$outdir"/lp.err \
     -v EXP="03vrfx",STRA="lp" solve_lp.sh
 
-# max(nn) max(pz)
-fullvr=$((150*150))
-
-qsub -N 03vrfx_geoloc050 -o "$outdir"/geoloc050.out -e "$outdir"/geoloc050.err \
-    -v EXP="03vrfx",STRA="geoloc050",PZ="050" solve_itervr.sh
-qsub -N 03vrfx_geoloc100 -o "$outdir"/geoloc100.out -e "$outdir"/geoloc100.err \
-    -v EXP="03vrfx",STRA="geoloc100",PZ="100" solve_itervr.sh
-qsub -N 03vrfx_geoloc150 -o "$outdir"/geoloc150.out -e "$outdir"/geoloc150.err \
-    -v EXP="03vrfx",STRA="geoloc150",PZ="150" solve_itervr.sh
-
-qsub -N 03vrfx_fullVR050 -o "$outdir"/fullVR050.out -e "$outdir"/fullVR050.err \
-    -v EXP="03vrfx",STRA="fullVR050",PZ="050",VR="$fullvr"
-qsub -N 03vrfx_fullVR100 -o "$outdir"/fullVR100.out -e "$outdir"/fullVR100.err \
-    -v EXP="03vrfx",STRA="fullVR100",PZ="100",VR="$fullvr"
-qsub -N 03vrfx_fullVR150 -o "$outdir"/fullVR150.out -e "$outdir"/fullVR150.err \
-    -v EXP="03vrfx",STRA="fullVR150",PZ="150",VR="$fullvr"
+for pz in $psizes; do
+    qsub -N 03vrfx_geoloc"$pz" -o "$outdir"/geoloc"$pz".out \
+        -e "$outdir"/geoloc"$pz".err \
+        -v EXP="03vrfx",STRA="geoloc""$pz",PZ="$pz" solve_itervr.sh
+    #
+    qsub -N 03vrfx_fullVR"$pz" -o "$outdir"/fullVR"$pz".out \
+        -e "$outdir"/fullVR"$pz".err \
+        -v EXP="03vrfx",STRA="fullVR""$pz",PZ="$pz",VR="$enoughVR" solve_geoloc.sh
+done

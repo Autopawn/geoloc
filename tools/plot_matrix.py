@@ -5,6 +5,8 @@ import matplotlib
 import itertools
 from scipy.stats import linregress
 
+import matplotlib.patches as mpatches
+
 # v So that doens't trow error through ssh.
 matplotlib.use('Agg')
 
@@ -64,6 +66,7 @@ if __name__ == '__main__':
         namevals = sorted(list(set([k[0] for k in points])))
         xxvals = sorted(list(set([k[1] for k in points if k[1]!='c'])))
         dimvals = [sorted(list(set([k[2+i] for k in points if k[2+i]!='k']))) for i in range(dims)]
+        if histogram: namevals = namevals[::-1]
 
         for name in namevals:
             for xx in xxvals+['c']:
@@ -161,7 +164,8 @@ if __name__ == '__main__':
                         dotsy = [dot[1] for dot in dots]
 
                         if histogram:
-                            subaxxarr.hist(dotsx,range=(xxmin,xxmax),bins=40)
+                            _,_,patchs = subaxxarr.hist(dotsx,range=(xxmin,xxmax),bins=40,color=col)
+                            lins.append(patchs[0])
                         else:
                             try:
                                 if not nullpoints:
@@ -187,14 +191,23 @@ if __name__ == '__main__':
                                 lins.append(loglin[0])
                     if name not in truefinalnames:
                         try:
-                            lins.append(lin[0])
+                            if not histogram:
+                                lins.append(lin[0])
                             truefinalnames.append(name)
                         except:
                             pass
                 if i==0 and j==0:
                     siz = 14.0
-                    if not histogram:
+                    print(lins)
+                    print(truefinalnames)
+                    if not histogram or colored:
                         fig.legend(lins,truefinalnames,loc='lower center',ncol=len(namevals),prop={'size':siz})
+                    # if not histogram:
+                    # if colored:
+                    #     patches = [mpatches.Patch(color=colordict[pname], label=pname)
+                    #         for pname in truefinalnames]
+                    #     plt.legend(handles=patches,loc='lower center',
+                    #         ncol=len(namevals),prop={'size':siz},bbox_to_anchor=(0.5, -0.05))
         #
         for i in range(yplots):
             if dims==2:

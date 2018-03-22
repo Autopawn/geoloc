@@ -26,8 +26,8 @@ def generate_svg(pos_file,geoloc_sol,lpsolve_sol,svg_file,size=1024,labels=False
                 tcost=float(lin[2])
             continue
         kind,x,y = lin.split()
-        x = int(x)
-        y = int(y)
+        x = int(float(x))
+        y = int(float(y))
         if kind=="f":
             facxpos.append(x)
             facypos.append(y)
@@ -35,8 +35,12 @@ def generate_svg(pos_file,geoloc_sol,lpsolve_sol,svg_file,size=1024,labels=False
             clixpos.append(x)
             cliypos.append(y)
         elif kind=="d":
-            dims = (size,size)
-            scale = (float(size)/x,float(size)/y)
+            if x < y:
+                dims = (int(size*x/y),size)
+                scale = (float(size)/y,float(size)/y)
+            else:
+                dims = (size,int(size*y/x))
+                scale = (float(size)/x,float(size)/x)
         else:
             raise ValueError('Invalid key on position file')
     pfile.close()

@@ -7,6 +7,7 @@ mkdir sols_04many
 
 #outdir="out/04many/$(date +%Y%m%d_%H%M%S)"
 outdir="out_04many"
+rm -rf "$outdir" || true
 mkdir -p "$outdir"
 
 

@@ -2,7 +2,7 @@ import numpy as np
 
 from sys import argv
 
-def problem_translate(inputfname,fname,kind="geoloc"):
+def problem_translate(inputfname,fname,kind="geoloc",weights=None):
     # Create file with the problem description
     tread = False
     facs = []
@@ -23,21 +23,21 @@ def problem_translate(inputfname,fname,kind="geoloc"):
             if lin[1]=="tread":
                 tread = True
         elif lin[0]=='f':
-            facs.append((int(lin[1]),int(lin[2])))
+            facs.append((float(lin[1]),float(lin[2])))
         elif lin[0]=='c':
-            clis.append((int(lin[1]),int(lin[2])))
+            clis.append((float(lin[1]),float(lin[2])))
     fi.close()
 
     facs = np.array(facs)
     clis = np.array(clis)
 
     if kind=="geoloc":
-        geoloc_problem(fname,facs,clis,fcost,vgain,tcost,tread)
+        geoloc_problem(fname,facs,clis,fcost,vgain,tcost,tread,weights)
     elif kind=="lpsolve":
-        lpsolve_problem(fname,facs,clis,fcost,vgain,tcost,tread)
+        lpsolve_problem(fname,facs,clis,fcost,vgain,tcost,tread,weights)
 
 
-def geoloc_problem(fname,facs,clis,fcost,vgain,tcost,tread):
+def geoloc_problem(fname,facs,clis,fcost,vgain,tcost,tread,weights):
     fo = open(fname,"w")
 
     fo.write("%d\n"%fcost)
@@ -55,7 +55,8 @@ def geoloc_problem(fname,facs,clis,fcost,vgain,tcost,tread):
     # client weights
     fo.write("\n")
     for i in range(clis.shape[0]):
-        fo.write("%d "%1)
+        we = 1 if weights is None else weights[i]
+        fo.write("%d "%we)
     fo.write("\n")
     # facility-client distance matrix
     fo.write("\n")
@@ -69,7 +70,7 @@ def geoloc_problem(fname,facs,clis,fcost,vgain,tcost,tread):
         fo.write("\n")
     fo.close()
 
-def lpsolve_problem(fname,facs,clis,fcost,vgain,tcost,tread):
+def lpsolve_problem(fname,facs,clis,fcost,vgain,tcost,tread,weights):
     # TODO: Make it more efficient when treas is false!
 
     fo = open(fname,"w")
@@ -79,7 +80,8 @@ def lpsolve_problem(fname,facs,clis,fcost,vgain,tcost,tread):
         for j in range(facs.shape[0]):
             fo.write(" -%d X%d"%(fcost,j))
         for i in range(clis.shape[0]):
-            fo.write(" +%d Z%d"%(vgain,i))
+            w = 1 if weights is None else weights[i]
+            fo.write(" +%d Z%d"%(vgain*w,i))
         fo.write(";\n")
         fo.write("\n")
         # Gain restriction:
@@ -102,9 +104,10 @@ def lpsolve_problem(fname,facs,clis,fcost,vgain,tcost,tread):
         for j in range(facs.shape[0]):
             fo.write(" -%d X%d"%(fcost,j))
         for i in range(clis.shape[0]):
+            w = 1 if weights is None else weights[i]
             for j in range(facs.shape[0]):
                 dist = ((facs[j,0]-clis[i,0])**2+(facs[j,1]-clis[i,1])**2)**0.5
-                fo.write(" %+d Y%dc%d"%(1*(vgain-tcost*int(round(dist))),i,j))
+                fo.write(" %+d Y%dc%d"%(1*(w*vgain-w*tcost*int(round(dist))),i,j))
         fo.write(";\n")
         fo.write("\n")
         # Plant location restriction:
@@ -127,7 +130,15 @@ def lpsolve_problem(fname,facs,clis,fcost,vgain,tcost,tread):
 
 # MAIN
 if __name__ == '__main__':
-    if len(argv)!=4 or (argv[2] not in ("geoloc","lpsolve")):
-        print("Usage: python %s <probfile> {geoloc|lpsolve} <outfile> "%argv[0])
+    if len(argv) not in (4,5) or (argv[2] not in ("geoloc","lpsolve")):
+        print("Usage: python %s <probfile> {geoloc|lpsolve} <outfile> [<weightsfile>]"%argv[0])
     else:
-        problem_translate(argv[1],argv[3],argv[2])
+        if len(argv)==4:
+            weif = None
+        else:
+            weif = []
+            fi = open(argv[4])
+            for lin in fi:
+                weif.append(int(lin.strip()))
+            fi.close()
+        problem_translate(argv[1],argv[3],argv[2],weif)

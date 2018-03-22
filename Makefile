@@ -17,7 +17,7 @@ geoloc_verbose:
 		-D VERBOSE -o ../geoloc_verbose.exe
 geoloc_pairs:
 	cd c_src; gcc -std=c99 -O -Wall -lm geoloc.c load.c main.c \
-		-D VERBOSE -D PAIR_DISTANCE \
+		-D VERBOSE -D PAIR_DISTANCE -D PRINT_EXPANSIONS \
 		-o ../geoloc_pairs.exe
 geoloc_vrtest:
 	cd c_src; gcc -std=c99 -O -Wall -lm geoloc.c load.c main.c \

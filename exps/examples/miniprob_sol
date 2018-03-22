@@ -1,0 +1,51 @@
+# Time: 0.000683
+# Input_file: miniprob_geo
+# Pool_size: 3
+# Iterations: 4
+# Vision_range: 4
+# Dissimilitude: MEAN_GEOMETRIC_ERROR
+SOLUTION:
+  Value: 4048
+  Facilities: 3
+     1 :   0   2   9  10  11  14  20  28
+     2 :   4   5   8  19  21  24  25
+     4 :   1   6   7  12  13  15  16  18  23  26  27  29
+SOLUTION:
+  Value: 3635
+  Facilities: 3
+     0 :   5   8  11  19  24  25
+     1 :   0   2   9  10  14  20  28
+     4 :   1   6   7  12  13  15  16  18  23  26  27  29
+SOLUTION:
+  Value: 3210
+  Facilities: 2
+     1 :   0   2   9  10  11  14  20  28
+     4 :   1   6   7  12  13  15  16  18  23  25  26  27  29
+SOLUTION:
+  Value: 2836
+  Facilities: 2
+     2 :   4   5   8  11  19  21  24  25
+     4 :   1   2   6   7  10  12  13  15  16  18  23  26  27  29
+SOLUTION:
+  Value: 2785
+  Facilities: 3
+     1 :   0   2   9  10  14  15  20  28
+     2 :   4   5   8  19  21  24  25
+     5 :   1   7  11  13  18  23  27  29
+SOLUTION:
+  Value: 2736
+  Facilities: 2
+     1 :   0   2   9  10  11  14  15  20  28  29
+     2 :   4   5   7   8  18  19  21  24  25  27
+SOLUTION:
+  Value: 1971
+  Facilities: 1
+     4 :   1   2   6   7  10  11  12  13  15  16  18  23  25  26  27  29
+SOLUTION:
+  Value: 1589
+  Facilities: 1
+     1 :   0   2   7   9  10  11  14  15  20  28  29
+SOLUTION:
+  Value: 1475
+  Facilities: 1
+     5 :   1   5   7   8  10  11  13  15  18  19  20  23  25  27  29

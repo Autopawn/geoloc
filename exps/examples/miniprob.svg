@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="1024" height="1024">
+<rect x="0" y="0" width="1024" height="1024" stroke-width="2" stroke="black" fill-opacity="0" />
+<circle cx="89.09" cy="480.26" r="4" fill="red"/>
+<circle cx="657.41" cy="266.24" r="4" fill="red"/>
+<circle cx="244.74" cy="279.55" r="4" fill="red"/>
+<circle cx="7.17" cy="804.86" r="4" fill="red"/>
+<circle cx="991.23" cy="925.70" r="4" fill="red"/>
+<circle cx="658.43" cy="750.59" r="4" fill="red"/>
+<circle cx="905.22" cy="63.49" r="4" fill="red"/>
+<circle cx="612.35" cy="434.18" r="4" fill="red"/>
+<circle cx="508.93" cy="770.05" r="4" fill="red"/>
+<circle cx="45.06" cy="637.95" r="4" fill="red"/>
+<circle cx="292.86" cy="271.36" r="4" fill="red"/>
+<circle cx="389.12" cy="577.54" r="4" fill="red"/>
+<circle cx="487.42" cy="51.20" r="4" fill="red"/>
+<circle cx="779.26" cy="351.23" r="4" fill="red"/>
+<circle cx="137.22" cy="446.46" r="4" fill="red"/>
+<circle cx="403.46" cy="278.53" r="4" fill="red"/>
+<circle cx="487.42" cy="112.64" r="4" fill="red"/>
+<circle cx="76.80" cy="984.06" r="4" fill="red"/>
+<circle cx="758.78" cy="529.41" r="4" fill="red"/>
+<circle cx="765.95" cy="728.06" r="4" fill="red"/>
+<circle cx="204.80" cy="575.49" r="4" fill="red"/>
+<circle cx="977.92" cy="762.88" r="4" fill="red"/>
+<circle cx="1015.81" cy="521.22" r="4" fill="red"/>
+<circle cx="550.91" cy="195.58" r="4" fill="red"/>
+<circle cx="421.89" cy="978.94" r="4" fill="red"/>
+<circle cx="796.67" cy="637.95" r="4" fill="red"/>
+<circle cx="526.34" cy="38.91" r="4" fill="red"/>
+<circle cx="778.24" cy="496.64" r="4" fill="red"/>
+<circle cx="111.62" cy="234.50" r="4" fill="red"/>
+<circle cx="497.66" cy="296.96" r="4" fill="red"/>
+<rect x="475.73" y="714.32" width="7" height="7" stroke-width="2" stroke="black" fill-opacity="0"/>
+<rect x="212.56" y="435.80" width="7" height="7" stroke-width="2" stroke="black" fill-opacity="0"/>
+<rect x="677.46" y="781.91" width="7" height="7" stroke-width="2" stroke="black" fill-opacity="0"/>
+<rect x="466.52" y="726.61" width="7" height="7" stroke-width="2" stroke="black" fill-opacity="0"/>
+<rect x="642.64" y="286.29" width="7" height="7" stroke-width="2" stroke="black" fill-opacity="0"/>
+<rect x="547.41" y="582.23" width="7" height="7" stroke-width="2" stroke="black" fill-opacity="0"/>
+<text x="462.73" y="711.32" font-size="10">0</text>
+<text x="199.56" y="432.80" font-size="10">1</text>
+<text x="664.46" y="778.91" font-size="10">2</text>
+<text x="453.52" y="723.61" font-size="10">3</text>
+<text x="629.64" y="283.29" font-size="10">4</text>
+<text x="534.41" y="579.23" font-size="10">5</text>
+</svg>

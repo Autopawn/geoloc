@@ -298,6 +298,14 @@ solution **new_expand_solutions(const problem *prob,
         solution *new_sol = safe_malloc(sizeof(solution));
         *new_sol = *fsol->origin;
         lint delta = solution_add(prob,new_sol,fsol->newf);
+        #ifdef PRINT_EXPANSIONS
+        printf("#EXPAND {");
+            for(int k=0;k<new_sol->n_facilities;k++){
+                printf("%d",new_sol->facilities[k]);
+                if(k<new_sol->n_facilities-1) printf(",");
+            }
+            printf("} :%lld %lld\n",new_sol->value,delta);
+        #endif
         if(delta<=0){
             free(new_sol);
             continue;
@@ -333,6 +341,10 @@ void reduce_solutions(const problem *prob,
     if(vision_range>*n_sols) vision_range = *n_sols;
     // Sort solution pointers from larger to smaller value of the solution.
     qsort(sols,*n_sols,sizeof(solution*),solution_value_cmp_inv);
+    #ifdef VERBOSE
+        printf("#BASESORTED\n");
+        print_solsets(sols,*n_sols);
+    #endif
     // Return if there is no need of reduction.
     if(*n_sols<=target_n) return;
     // Double linked structure to know solutions that haven't yet been discarted:
@@ -353,12 +365,18 @@ void reduce_solutions(const problem *prob,
     for(int i=0;i<*n_sols;i++){
         for(int j=1;j<=vision_range;j++){
             if(i+j>=*n_sols) break;
-            dissimpair dp;
-            dp.indx_a = i;
-            dp.indx_b = i+j;
-            dp.dissim = solution_dissimilitude(prob,
-                sols[dp.indx_a],sols[dp.indx_b]);
-            heap_add(heap,&n_pairs,dp);
+            dissimpair pair;
+            pair.indx_a = i;
+            pair.indx_b = i+j;
+            pair.dissim = solution_dissimilitude(prob,
+                sols[pair.indx_a],sols[pair.indx_b]);
+            #ifdef PAIR_DISTANCE
+            printf("#INITIAL DISSIM %d(%lld) %d(%lld) %llu\n",
+                pair.indx_a,sols[pair.indx_a]->value,
+                pair.indx_b,sols[pair.indx_b]->value,
+                pair.dissim);
+            #endif
+            heap_add(heap,&n_pairs,pair);
         }
     }
     // Eliminate as much solutions as required:
@@ -427,6 +445,12 @@ void reduce_solutions(const problem *prob,
                     pair.indx_b = pair_b;
                     pair.dissim = solution_dissimilitude(prob,
                         sols[pair.indx_a],sols[pair.indx_b]);
+                    #ifdef PAIR_DISTANCE
+                    printf("#REPLACEMENT DISSIM %d(%lld) %d(%lld) %llu\n",
+                        pair.indx_a,sols[pair.indx_a]->value,
+                        pair.indx_b,sols[pair.indx_b]->value,
+                        pair.dissim);
+                    #endif
                     assert(n_pairs<2*(*n_sols)*vision_range);
                     heap_add(heap,&n_pairs,pair);
                 }

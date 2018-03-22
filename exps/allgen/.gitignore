@@ -2,4 +2,4 @@ prob_*
 sols_*
 .nfs*
 out_*
-coll_*
+coll_*/*
