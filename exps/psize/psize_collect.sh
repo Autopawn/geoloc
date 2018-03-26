@@ -18,7 +18,7 @@ grep -R . solutions/*/gl_*_times.txt | sed -E "$gl_regex" >> \
     $target/times.txt
 python ../../tools/plot_matrix.py "$colors" -ly -sx -sy $target/times.txt \
     $target/times.png \
-    'Tiempos de ejecución v/s $PZ$ con full-$VR$ '"$parameters" '$N$'
+    'Tiempos v/s $PZ$ con full-$VR$ '"$parameters" '$N$'
 
 # Collect the values
 grep -R . solutions/*/lp_vals.txt | sed -E "$lp_regex" >> \
@@ -42,11 +42,11 @@ python ../../tools/plot_matrix.py "$colors" -sx -sy $target/nfacs.txt \
 python ../../tools/portion_of_max.py lp $target/vals.txt $target/props.txt
 python ../../tools/plot_matrix.py "$colors" -sx -sy $target/props.txt \
     $target/props.png \
-    'Optimalidad v/s $PZ$ con full-$VR$ '"$parameters" '$N$'
+    'Valor relativo v/s $PZ$ con full-$VR$ '"$parameters" '$N$'
 
 # Create file for the negated proportions
 python ../../tools/portion_of_max.py -i -n lp $target/vals.txt \
     $target/nprops.txt
 python ../../tools/plot_matrix.py "$colors" -r -sx -sy -ly -lx \
     $target/nprops.txt $target/nprops.png \
-    'Diferencia promedio de optimalidad v/s $PZ$ con full-$VR$ '"$parameters" '$N$'
+    'Valor perdido relativo v/s $PZ$ con full-$VR$ '"$parameters" '$N$'

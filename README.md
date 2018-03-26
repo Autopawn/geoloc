@@ -1,5 +1,19 @@
 # Geoloc
 
+## Experiments location
+
+The code to perform experiments like the ones presented on the thesis are located on the following folders:
+
+```
+exps/iden:   Identification of interesting problems on the P and C spectre.
+exps/psize:  Analysis of the effect of the PZ on the optimality.
+exps/vrfx:   Analysis of the effect of the VR on the optimality.
+exps/disim:  Detailed analysis of the behavior of VR.
+exps/allgen: Testing several algorithms.
+```
+
+The problems usually have a `vars` file with the experiment variables, a `generate` script that creates the problems, a `solve` script that solves the problems and summarizes the results and a `collect` script that takes the summaries and transform them into graphs.
+
 ## C code and Python tools
 
 The main version of the algorithm is done in the C language. To compile and create `geoloc.exe`:

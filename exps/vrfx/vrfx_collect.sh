@@ -45,4 +45,4 @@ python ../../tools/portion_of_max.py -d fullVR \
     "$target"/props_wo_lp.txt "$target"/props_diff_fullVR.txt
 python ../../tools/plot_matrix.py -sx -sy -np "$target"/props_diff_fullVR.txt \
     "$target"/props_np_diff_fullVR.png "$colors" \
-    'Diferencia promedio de optimalidad respecto a full-$VR$ v/s $VR$' '$N$' '$PZ$'
+    'Diferencia de valor relativo con full-$VR$ v/s $VR$' '$N$' '$PZ$'
