@@ -29,6 +29,7 @@ if __name__ == '__main__':
         print("Usage: %s [-lx] [-ly] [-sx] [-sy] [-colors=<colordict>] <summary_file> <output> <title> [<var_1>] [<var_2>]"%argis[0])
     else:
         dims = len(argis)-4
+        linewidth = 1+len(['meh' for x in sys.argv if x=="-w"])
         logx = "-lx" in sys.argv
         logy = "-ly" in sys.argv
         sharex = "-sx" in sys.argv
@@ -147,9 +148,10 @@ if __name__ == '__main__':
                         try:
                             if not nullpoints:
                                 for yy in pointsyy:
-                                    subaxxarr.plot([xxmin,xxmax],[yy,yy],"-",color=col,alpha=0.1)
+                                    subaxxarr.plot([xxmin,xxmax],[yy,yy],"-",color=col,alpha=0.1,linewidth=linewidth)
                             yymean = np.mean(pointsyy)
-                            lin = subaxxarr.plot([xxmin,xxmax],[yymean,yymean],'-',color=col)
+                            lin = subaxxarr.plot([xxmin,xxmax],[yymean,yymean],'-',color=col,
+                                linewidth=linewidth)
                         except ValueError: pass
                     else:
                         data = [(xx,points[keytup(xx)]) for xx in myxxvals]
@@ -170,7 +172,7 @@ if __name__ == '__main__':
                             try:
                                 if not nullpoints:
                                     subaxxarr.plot(dotsx,dotsy,"o",color=col,alpha=0.1)
-                                lin = subaxxarr.plot(meanx,meany,'-',color=col)
+                                lin = subaxxarr.plot(meanx,meany,'-',color=col,linewidth=linewidth)
                             except ValueError: pass
 
                             if linreg:
@@ -186,7 +188,7 @@ if __name__ == '__main__':
                                     subaxxarr.text(1.4,0.15,'$y= %.4f x %+.4f$'%(slope,inter), fontsize=12)
 
                                 coldark = (col[0]*0.6,col[1]*0.6,col[2]*0.6)
-                                loglin = subaxxarr.plot([xxmin,xxmax],[yini,yend],'--',color=coldark)
+                                loglin = subaxxarr.plot([xxmin,xxmax],[yini,yend],'--',color=coldark,linewidth=linewidth)
                                 truefinalnames.append("reg. "+name)
                                 lins.append(loglin[0])
                     if name not in truefinalnames:
