@@ -5,6 +5,6 @@ cctests="0.80 0.60 0.40 0.20"
 ntiers=8
 ncases=5
 
-colors='-colors={"lp":(0,0,0),"greedy":(1,0,0),"geoloc300":(0,1,0.5),"geoloc600":(0,0,1),"random3000":(0.5,0.5,0.5),"geoloc3000vr1":(1,0.5,0)}'
+colors='-colors={"lp":(0,0,0),"greedy":(1,0,0,0.5),"geoloc300":(0,0.7,1),"geoloc600":(0,0,1),"random3000":(0.5,0.5,0.5),"geoloc3000vr1":(1,0.5,0)}'
 
 memlimit=$((5*1024*1024))
