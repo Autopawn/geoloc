@@ -33,27 +33,27 @@ done
 
 cd ../"$target"
 
-python ../../../tools/plot_matrix.py -hx -ly -sx -sy times times.png \
+python ../../../tools/plot_matrix.py -w -hx -ly -sx -sy times times.png \
     "$colors" 'Tiempos v/s $N$' '$P$' '$\mathcal{C}$'
 
 # Collect the values
-python ../../../tools/plot_matrix.py -hx -sx -sy vals vals.png \
+python ../../../tools/plot_matrix.py -w -hx -sx -sy vals vals.png \
     "$colors" 'Valor de la sol. v/s $N$' '$P$' '$\mathcal{C}$'
 
 # Collect the number of factories
-python ../../../tools/plot_matrix.py -hx -sx -sy nfacs nfacs.png \
+python ../../../tools/plot_matrix.py -w -hx -sx -sy nfacs nfacs.png \
     "$colors" 'No. de instalaciones v/s $N$' '$P$' '$\mathcal{C}$'
 
 # Collect the number of factories
-python ../../../tools/plot_matrix.py -hx -sx -sy msizes msizes.png \
+python ../../../tools/plot_matrix.py -w -hx -sx -sy msizes msizes.png \
     "$colors" 'No. de iteraciones v/s $N$' '$P$' '$\mathcal{C}$'
 
 # Create file for the proportions
 python ../../../tools/portion_of_max.py greedy vals props
-python ../../../tools/plot_matrix.py -np -hx -sx -sy props props.png \
+python ../../../tools/plot_matrix.py -w -np -hx -sx -sy props props.png \
     "$colors" 'Valor respecto a greedy v/s $N$' '$P$' '$\mathcal{C}$'
 
 # Zoomed proportions
 cat props | grep -v "random3000" > props_z
-python ../../../tools/plot_matrix.py -np -hx -sx -sy props_z props_z.png \
+python ../../../tools/plot_matrix.py -w -np -hx -sx -sy props_z props_z.png \
     "$colors" 'Valor respecto a greedy v/s $N$' '$P$' '$\mathcal{C}$'

@@ -29,7 +29,7 @@ if __name__ == '__main__':
         print("Usage: %s [-lx] [-ly] [-sx] [-sy] [-colors=<colordict>] <summary_file> <output> <title> [<var_1>] [<var_2>]"%argis[0])
     else:
         dims = len(argis)-4
-        linewidth = 1+len(['meh' for x in sys.argv if x=="-w"])
+        linewidth = 1.0+len(['meh' for x in sys.argv if x=="-w"])
         logx = "-lx" in sys.argv
         logy = "-ly" in sys.argv
         sharex = "-sx" in sys.argv
@@ -148,7 +148,7 @@ if __name__ == '__main__':
                         try:
                             if not nullpoints:
                                 for yy in pointsyy:
-                                    subaxxarr.plot([xxmin,xxmax],[yy,yy],"-",color=col,alpha=0.1,linewidth=linewidth)
+                                    subaxxarr.plot([xxmin,xxmax],[yy,yy],"-",color=col,alpha=0.1)
                             yymean = np.mean(pointsyy)
                             lin = subaxxarr.plot([xxmin,xxmax],[yymean,yymean],'-',color=col,
                                 linewidth=linewidth)
