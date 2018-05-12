@@ -31,7 +31,7 @@ $ python3 tools/prob_generator.py 100 50 1000 800 300 1 cases/test_prob.txt
 
 This will create the file `cases/test_prob.txt` with a generic definition of the problem.
 
-To create a definition of the problem that can be used as input for `geoloc`, you use te translator:
+To create a definition of the problem that can be used as input for `geoloc`, you use the translator:
 
 ```bash
 $ python3 tools/prob_translator.py cases/test_prob.txt geoloc cases/test_geoloc_prob.txt

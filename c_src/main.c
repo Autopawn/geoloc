@@ -58,6 +58,18 @@ int main(int argc, char **argv){
     for(int i=0;i<sols_show;i++){
         print_solution(stdout,sols[i]);
     }
+    // Perform local search
+    #ifdef LOCAL_SEARCH
+        printf("Starting local searchs...\n");
+        local_search_solutions(prob,sols,&n_sols);
+        // Print best solutions
+        printf("Best solutions after HC:\n");
+        sols_show = n_sols;
+        if(sols_show>max_to_show) sols_show = max_to_show;
+        for(int i=0;i<sols_show;i++){
+            print_solution(stdout,sols[i]);
+        }
+    #endif
     printf("Saving solutions...\n");
     if(sols_show==0){
         solution empty_sol = empty_solution();

@@ -54,12 +54,30 @@ solution empty_solution();
 solution **new_find_best_solutions(problem* prob,
         int pool_size, int vision_range, int *final_n, int *n_iterations);
 
+void local_search_solutions(problem* prob, solution **sols, int *n_sols);
+
 problem *new_problem_load(const char *file);
 
 void save_solutions(const char *file, solution **sols, int n_sols,
         const char *input_file, int pool_size, int vision_range,
         float seconds, int n_iterations);
 
+// aux functions:
+void *safe_malloc(size_t size);
+uint hash_int(uint x);
+void add_to_sorted(short *array, int *len, short val);
+void rem_of_sorted(short *array, int *len, short val);
+// solution related functions:
+solution empty_solution();
+lint solution_add(const problem *prob, solution *sol, short newf);
+lint solution_remove(const problem *prob, solution *sol, short remf);
+lint solution_dissimilitude(const problem *prob,
+        const solution *sol_a, const solution *sol_b);
+solution solution_hill_climbing(const problem *prob, solution sol);
+int solution_value_cmp_inv(const void *a, const void *b);
+int solution_cmp(const void *a, const void *b);
+
+// printing functions:
 static inline void print_solution(FILE *f, const solution *sol){
     fprintf(f,"SOLUTION:\n");
     fprintf(f,"  Value: %lld\n",sol->value);

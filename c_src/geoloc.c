@@ -1,150 +1,6 @@
 #include "geoloc.h"
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// MISCELANEOUS AND COMPARISON FUNCTIONS
-//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-static inline void *safe_malloc(size_t size){
-    void *ptr = malloc(size);
-    if(size>0 && ptr==NULL){
-        fprintf(stderr,"ERROR: Not enough memory!\n");
-        exit(1);
-    }
-    return ptr;
-}
-
-uint hash_int(uint x){
-    // Thanks to https://stackoverflow.com/a/12996028
-    x = ((x >> 16)^x)*0x45d9f3b;
-    x = ((x >> 16)^x)*0x45d9f3b;
-    x = (x >> 16)^x;
-    return x;
-}
-
-// Compare the distance of two clients to one specific facility
-static const problem *prob_value_for_compare_dist_to_f;
-static int f_value_for_compare_dist_to_f;
-int compare_dist_to_f(const void * a, const void * b){
-    short ia = *(short*)a;
-    short ib = *(short*)b;
-    const problem *prob = prob_value_for_compare_dist_to_f;
-    const int f = f_value_for_compare_dist_to_f;
-    return prob->distances[f][ia]-prob->distances[f][ib];
-}
-
-int solution_value_cmp_inv(const void *a, const void *b){
-    solution **aa = (solution **) a;
-    solution **bb = (solution **) b;
-    return (*bb)->value - (*aa)->value;
-}
-
-void add_to_sorted(short *array, int *len, short val){
-    int place = *len;
-    while(place>0){
-        if(array[place-1]<=val) break;
-        array[place] = array[place-1];
-        place--;
-    }
-    array[place] = val;
-    *len += 1;
-}
-
-//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-// SOLUTION FUNCTIONS
-//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-// | Returns an empty solution, with no facilities.
-solution empty_solution(){
-    solution sol;
-    sol.n_facilities = 0;
-    for(int c=0;c<MAX_CLIENTS;c++) sol.assignments[c] = -1;
-    sol.value = 0;
-    return sol;
-}
-
-// | Adds a facility to the solution, returns the delta of the value on the objective function.
-lint solution_add(const problem *prob, solution *sol, short newf){
-    // Check if f is already on the solution:
-    for(int f=0;f<sol->n_facilities;f++){
-        if(sol->facilities[f]==newf) return 0;
-    }
-    // Add the facility to the solution.
-    add_to_sorted(sol->facilities,&sol->n_facilities,newf);
-    // | Critical radious.
-    lint crit_rad = prob->variant_gain/prob->transport_cost;
-    // | Difference on the value after adding the new facility.
-    lint delta = 0;
-    // Reassign clients to the new facility, from nearest to further.
-    for(int c=0;c<prob->n_clients;c++){
-        short cli = prob->nearest[newf][c];
-        // Distance of that client to the new facility:
-        lint distance = prob->distances[newf][cli];
-        if(distance>crit_rad) break;
-        // Distance to the previously assignated facility:
-        lint old_distance = -1;
-        if(sol->assignments[cli]!=-1){
-            old_distance = prob->distances[sol->assignments[cli]][cli];
-        }
-        if(old_distance==-1 || distance<old_distance){
-            // ^ If client not assigned, or is nearest to the new facility assign it.
-            // Gain of the new assignation:
-            delta += prob->weights[cli]*
-                (prob->variant_gain-prob->transport_cost*distance);
-            // Lost the previous assignation:
-            if(old_distance!=-1){
-                delta -= prob->weights[cli]*
-                    (prob->variant_gain-prob->transport_cost*old_distance);
-            }
-            // Reassign client to new facility
-            sol->assignments[cli] = newf;
-        }
-    }
-    // The constant cost of a facility:
-    delta -= prob->facility_fixed_cost;
-    // Update solution value:
-    sol->value += delta;
-    return delta;
-}
-
-// Returns the dissimilitude (using mean geometric error or Hausdorff).
-lint solution_dissimilitude(const problem *prob,
-        const solution *sol_a, const solution *sol_b){
-    lint disim = 0;
-    for(int t=0;t<2;t++){
-        #ifdef HAUSDORFF
-            for(int ai=0;ai<sol_a->n_facilities;ai++){
-                short f_a = sol_a->facilities[ai];
-                lint cmin = MAX_LINT;
-                for(int bi=0;bi<sol_b->n_facilities;bi++){
-                    short f_b = sol_b->facilities[bi];
-                    lint dist = prob->fdistances[f_a][f_b];
-                    if(dist<cmin) cmin = dist;
-                    if(cmin<disim) break;
-                }
-                if(disim<cmin && cmin<MAX_LINT) disim = cmin;
-            }
-        #else
-            // Add distance from each facility in A to B.
-            for(int ai=0;ai<sol_a->n_facilities;ai++){
-                lint min_dist = -1;
-                short f_a = sol_a->facilities[ai];
-                for(int bi=0;bi<sol_b->n_facilities;bi++){
-                    short f_b = sol_b->facilities[bi];
-                    lint dist = prob->fdistances[f_a][f_b];
-                    if(min_dist==-1 || dist<min_dist) min_dist = dist;
-                }
-                disim += min_dist;
-            }
-        #endif
-        // Swap solutions for 2nd iteration:
-        const solution *aux = sol_a;
-        sol_a = sol_b;
-        sol_b = aux;
-    }
-    return disim;
-}
-
-//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // FUTURESOL
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -220,6 +76,17 @@ void heap_add(dissimpair *heap, int *size, dissimpair val){
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // MAIN ALGORITHM
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+// Compare the distance of two clients to one specific facility
+static const problem *prob_value_for_compare_dist_to_f;
+static int f_value_for_compare_dist_to_f;
+int compare_dist_to_f(const void * a, const void * b){
+    short ia = *(short*)a;
+    short ib = *(short*)b;
+    const problem *prob = prob_value_for_compare_dist_to_f;
+    const int f = f_value_for_compare_dist_to_f;
+    return prob->distances[f][ia]-prob->distances[f][ib];
+}
 
 // | Compute the clients indexes sorted by distance for each facility.
 void problem_compute_nearest(problem* prob){
@@ -613,4 +480,32 @@ solution **new_find_best_solutions(problem* prob,
     *final_n = current_sol_n;
     // Return it
     return final;
+}
+
+void local_search_solutions(problem* prob, solution **sols, int *n_sols){
+    printf("Performing local search for %d solutions...\n",*n_sols);
+    // Perform HC for each solution:
+    for(int i=0;i<*n_sols;i++){
+        solution enhanced = solution_hill_climbing(prob,*sols[i]);
+        if(sols[i]->value!=enhanced.value){
+            printf("sol %d: %lld -> %lld\n",i,sols[i]->value,enhanced.value);
+        }
+        *sols[i] = enhanced;
+    }
+    printf("Deleting repeated solutions...\n");
+    // Sort solution pointers to indenfify repeated solutions (also in decreasing value).
+    qsort(sols,*n_sols,sizeof(solution*),solution_cmp);
+    // Detect and delete repeated solutions:
+    int n_final = 0;
+    for(int i=1;i<*n_sols;i++){
+        if(solution_cmp(&sols[n_final],&sols[i])!=0){
+            n_final++;
+            *sols[n_final] = *sols[i];
+        }
+    }
+    for(int k=n_final;k<*n_sols;k++){
+        free(sols[k]);
+    }
+    printf("Local search reduced %d solutions to %d local optima.\n",*n_sols,n_final);
+    *n_sols = n_final;
 }

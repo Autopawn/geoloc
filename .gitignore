@@ -1,6 +1,7 @@
 # Mine
 .remote-sync.json
 cases
+results
 
 # Output
 best*.asy
