@@ -133,6 +133,8 @@ lint solution_remove(const problem *prob, solution *sol, short remf){
             sol->assignments[cli] = reaf;
         }
     }
+    // The constant cost of a facility is recovered:
+    delta += prob->facility_fixed_cost;
     // Update solution value:
     sol->value += delta;
     return delta;
@@ -184,7 +186,7 @@ solution solution_hill_climbing(const problem *prob, solution sol){
     while(improvement){
         improvement = 0;
         // Remove a facility:
-        for(int k=0;k<best.n_facilities;k++){
+        for(int k=0;k<sol.n_facilities;k++){
             solution cand0 = best;
             solution_remove(prob,&cand0,cand0.facilities[k]);
             // Add facility j:
