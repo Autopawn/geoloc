@@ -71,7 +71,7 @@ def geoloc_problem(fname,facs,clis,fcost,vgain,tcost,tread,weights):
     fo.close()
 
 def lpsolve_problem(fname,facs,clis,fcost,vgain,tcost,tread,weights):
-    # TODO: Make it more efficient when treas is false!
+    # TODO: Make it more efficient when tread is false! WOAH better not to.
 
     fo = open(fname,"w")
     # Objective function:
@@ -85,8 +85,8 @@ def lpsolve_problem(fname,facs,clis,fcost,vgain,tcost,tread,weights):
         fo.write(";\n")
         fo.write("\n")
         # Gain restriction:
-        one_near = False
         for i in range(clis.shape[0]):
+            one_near = False
             fo.write("Z%d <= "%i)
             for j in range(facs.shape[0]):
                 dist = ((facs[j,0]-clis[i,0])**2+(facs[j,1]-clis[i,1])**2)**0.5

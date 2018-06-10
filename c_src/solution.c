@@ -180,21 +180,25 @@ lint solution_dissimilitude(const problem *prob,
 
 // Takes a solution and uses hill climbing with best-improvement, using an exchange movement.
 solution solution_hill_climbing(const problem *prob, solution sol){
+    if(sol.n_facilities==0) return sol;
     solution best = sol;
     //
     int improvement = 1;
     while(improvement){
         improvement = 0;
         // Remove a facility:
+        solution cand0 = best;
         for(int k=0;k<sol.n_facilities;k++){
-            solution cand0 = best;
-            solution_remove(prob,&cand0,cand0.facilities[k]);
+            assert(cand0.n_facilities==sol.n_facilities);
+            solution cand1 = cand0;
+            solution_remove(prob,&cand1,cand0.facilities[k]);
             // Add facility j:
             for(int j=0;j<prob->n_facilities;j++){
-                solution cand = cand0;
-                solution_add(prob,&cand,j);
-                if(cand.value>best.value){
-                    best = cand;
+                solution cand2 = cand1;
+                solution_add(prob,&cand2,j);
+                if(cand2.n_facilities==cand0.n_facilities &&
+                        cand2.value>best.value){
+                    best = cand2;
                     improvement = 1;
                 }
             }
